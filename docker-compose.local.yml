@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: local-api
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+      target: development
+    ports:
+      - '3010:3010'
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - ./uploads:/app/uploads
+      - ./public:/app/public
+    env_file:
+      - ${ENV_FILE:-.env.local}
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+    depends_on:
+      - db
+
+  db:
+    container_name: local-postgres
+    image: postgres:17
+    restart: always
+    ports:
+      - '5433:5432'
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

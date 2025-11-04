@@ -1,0 +1,53 @@
+import Joi from 'joi';
+
+export const cmsUserSchema = Joi.object({
+  name: Joi.string().max(200).required(),
+  email: Joi.string().email().max(255).required(),
+  password: Joi.string().min(6).max(255).required(),
+  mobile_no: Joi.string().max(20).required(),
+  office_no: Joi.string().max(20).allow(null, ""),
+  fax_no: Joi.string().max(20).allow(null, ""),
+  company_name: Joi.string().max(255).required(),
+  role: Joi.number().integer().required(),
+  website_type: Joi.number().integer().required(),
+  fburl: Joi.string().uri().max(250).allow(null, ""),
+  xurl: Joi.string().uri().max(250).allow(null, ""),
+  linkedinurl: Joi.string().uri().max(250).allow(null, ""),
+  yturl: Joi.string().uri().max(250).allow(null, ""),
+  instaurl: Joi.string().uri().max(250).allow(null, ""),
+  country: Joi.string().max(100).allow(null, ""),
+  gstin: Joi.string().max(100).allow(null, ""),
+  address1: Joi.string().max(255).allow(null, ""),
+  address2: Joi.string().max(255).allow(null, ""),
+  image: Joi.string().allow(null, ""),
+  company_logo: Joi.string(),
+  status: Joi.string().valid("Y", "N").default("Y"),
+  deleted: Joi.string().valid("Y", "N").default("N"),
+  approval: Joi.string().valid("Y", "N").default("N"),
+});
+
+export const editCmsUserSchema = cmsUserSchema.fork(Object.keys(cmsUserSchema.describe().keys), (field) => field.optional());
+
+// export const UpdateUser = Joi.object({
+//   name: Joi.string().max(200).optional(),
+//   email: Joi.string().email().max(200).optional(),
+//   password: Joi.string().min(6).max(200).optional(),
+//   mobile: Joi.string().max(20).optional().allow(null, ''),
+//   phone: Joi.string().max(60).optional().allow(null, ''),
+//   fax: Joi.string().max(20).optional().allow(null, ''),
+//   role: Joi.string().max(250).optional().allow(null, ''),
+//   branch_id: Joi.number().integer().optional(),
+//   fburl: Joi.string().uri().max(250).optional().allow(null, ''),
+//   twitterurl: Joi.string().uri().max(250).optional().allow(null, ''),
+//   linkedinurl: Joi.string().uri().max(250).optional().allow(null, ''),
+//   instaurl: Joi.string().uri().max(250).optional().allow(null, ''),
+//   yturl: Joi.string().uri().optional().allow(null, ''),
+//   googleplusurl: Joi.string().uri().max(250).optional().allow(null, ''),
+//   address: Joi.string().optional().allow(null, ''),
+//   address2: Joi.string().optional().allow(null, ''),
+//   company_name: Joi.string().optional().allow(null, ''),
+//   gstin: Joi.string().optional().allow(null, ''),
+//   image: Joi.string().optional().allow(null, ''),
+//   status: Joi.string().valid('Y', 'N').optional(),
+//   updatedAt: Joi.date().optional(),
+// });
