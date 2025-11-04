@@ -21,6 +21,7 @@ const bcryptUtil = {
      */
     createHash: (plainPassword) => {
         return bcrypt_1.default.hash(plainPassword, 10); // 10 is the salt rounds
-    }
+    },
 };
 exports.default = bcryptUtil;
+//# sourceMappingURL=bcrypt.util.js.map

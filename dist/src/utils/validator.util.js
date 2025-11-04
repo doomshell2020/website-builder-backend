@@ -5,7 +5,7 @@ const validate = (schema) => async (req, res, next) => {
         try {
             const options = {
                 errors: {
-                    wrap: { label: '' }
+                    wrap: { label: '' },
                 },
                 abortEarly: true,
             };
@@ -27,3 +27,4 @@ const validate = (schema) => async (req, res, next) => {
     }
 };
 exports.default = validate;
+//# sourceMappingURL=validator.util.js.map

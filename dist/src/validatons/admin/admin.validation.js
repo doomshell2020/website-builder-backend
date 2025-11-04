@@ -43,6 +43,7 @@ const register = joi_1.default.object().keys({
         'number.min': 'Status should be at least 0',
         'number.max': 'Status should be at most 3',
     }),
+    role: joi_1.default.string().valid('2', '3', '4').default('4'),
 });
 // Joi schema for admin login validation
 const login = joi_1.default.object().keys({
@@ -53,6 +54,7 @@ const login = joi_1.default.object().keys({
 });
 // Export both schemas as a default object
 exports.default = {
-    register,
-    login,
+    register: register,
+    login: login,
 };
+//# sourceMappingURL=admin.validation.js.map

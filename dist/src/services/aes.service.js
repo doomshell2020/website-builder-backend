@@ -5,8 +5,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.decrypt = exports.encrypt = void 0;
 const crypto_1 = __importDefault(require("crypto"));
-const key = Buffer.from("0123456789abcdef0123456789abcdef"); // 256-bit key
-const iv = Buffer.from("I8zyA4lVhMCaJ5Kg"); // 16 bytes for AES-CBC
+const key = Buffer.from('0123456789abcdef0123456789abcdef'); // 256-bit key
+const iv = Buffer.from('I8zyA4lVhMCaJ5Kg'); // 16 bytes for AES-CBC
 const encrypt = (data) => {
     const cipher = crypto_1.default.createCipheriv('aes-256-cbc', key, iv);
     let encrypted = cipher.update(data, 'utf-8', 'hex');
@@ -21,3 +21,4 @@ const decrypt = (data) => {
     return decrypted;
 };
 exports.decrypt = decrypt;
+//# sourceMappingURL=aes.service.js.map

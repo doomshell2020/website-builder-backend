@@ -65,3 +65,4 @@ exports.apiErrors = Object.entries(errorDefinitions).reduce((map, [name, data]) 
     map[name] = ErrorClass;
     return map;
 }, {});
+//# sourceMappingURL=api-errors.js.map

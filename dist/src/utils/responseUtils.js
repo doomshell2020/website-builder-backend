@@ -2,7 +2,7 @@
 // responseUtils.ts
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.successResponse = void 0;
-const successResponse = (message = null, result = "") => {
+const successResponse = (message = null, result = '') => {
     return {
         statusCode: 200,
         body: {
@@ -13,3 +13,4 @@ const successResponse = (message = null, result = "") => {
     };
 };
 exports.successResponse = successResponse;
+//# sourceMappingURL=responseUtils.js.map

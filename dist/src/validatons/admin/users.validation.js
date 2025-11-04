@@ -3,19 +3,55 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.editCmsUserSchema = exports.cmsUserSchema = void 0;
 const joi_1 = __importDefault(require("joi"));
-const AddUser = joi_1.default.object({
-    name: joi_1.default.string().max(255).required(),
-    email: joi_1.default.string().email().required(),
-    mobile: joi_1.default.string().max(20).required(),
-    country: joi_1.default.string().required(),
-    state: joi_1.default.string().required(),
-    city: joi_1.default.string().required(),
-    address: joi_1.default.string().required(),
-    landmark: joi_1.default.string().allow(null, ''),
-    dob: joi_1.default.date().allow(null, ''),
-    gender: joi_1.default.string().valid('male', 'female', 'other').allow(null, ''),
-    status: joi_1.default.string().valid('active', 'inactive').default('active'),
-    categories: joi_1.default.alternatives().try(joi_1.default.array().items(joi_1.default.string()), joi_1.default.string()).optional()
+exports.cmsUserSchema = joi_1.default.object({
+    name: joi_1.default.string().max(200).required(),
+    email: joi_1.default.string().email().max(255).required(),
+    password: joi_1.default.string().min(6).max(255).required(),
+    mobile_no: joi_1.default.string().max(20).required(),
+    office_no: joi_1.default.string().max(20).allow(null, ""),
+    fax_no: joi_1.default.string().max(20).allow(null, ""),
+    company_name: joi_1.default.string().max(255).required(),
+    role: joi_1.default.number().integer().required(),
+    website_type: joi_1.default.number().integer().required(),
+    fburl: joi_1.default.string().uri().max(250).allow(null, ""),
+    xurl: joi_1.default.string().uri().max(250).allow(null, ""),
+    linkedinurl: joi_1.default.string().uri().max(250).allow(null, ""),
+    yturl: joi_1.default.string().uri().max(250).allow(null, ""),
+    instaurl: joi_1.default.string().uri().max(250).allow(null, ""),
+    country: joi_1.default.string().max(100).allow(null, ""),
+    gstin: joi_1.default.string().max(100).allow(null, ""),
+    address1: joi_1.default.string().max(255).allow(null, ""),
+    address2: joi_1.default.string().max(255).allow(null, ""),
+    image: joi_1.default.string().allow(null, ""),
+    company_logo: joi_1.default.string(),
+    status: joi_1.default.string().valid("Y", "N").default("Y"),
+    deleted: joi_1.default.string().valid("Y", "N").default("N"),
+    approval: joi_1.default.string().valid("Y", "N").default("N"),
 });
-exports.default = { AddUser };
+exports.editCmsUserSchema = exports.cmsUserSchema.fork(Object.keys(exports.cmsUserSchema.describe().keys), (field) => field.optional());
+// export const UpdateUser = Joi.object({
+//   name: Joi.string().max(200).optional(),
+//   email: Joi.string().email().max(200).optional(),
+//   password: Joi.string().min(6).max(200).optional(),
+//   mobile: Joi.string().max(20).optional().allow(null, ''),
+//   phone: Joi.string().max(60).optional().allow(null, ''),
+//   fax: Joi.string().max(20).optional().allow(null, ''),
+//   role: Joi.string().max(250).optional().allow(null, ''),
+//   branch_id: Joi.number().integer().optional(),
+//   fburl: Joi.string().uri().max(250).optional().allow(null, ''),
+//   twitterurl: Joi.string().uri().max(250).optional().allow(null, ''),
+//   linkedinurl: Joi.string().uri().max(250).optional().allow(null, ''),
+//   instaurl: Joi.string().uri().max(250).optional().allow(null, ''),
+//   yturl: Joi.string().uri().optional().allow(null, ''),
+//   googleplusurl: Joi.string().uri().max(250).optional().allow(null, ''),
+//   address: Joi.string().optional().allow(null, ''),
+//   address2: Joi.string().optional().allow(null, ''),
+//   company_name: Joi.string().optional().allow(null, ''),
+//   gstin: Joi.string().optional().allow(null, ''),
+//   image: Joi.string().optional().allow(null, ''),
+//   status: Joi.string().valid('Y', 'N').optional(),
+//   updatedAt: Joi.date().optional(),
+// });
+//# sourceMappingURL=users.validation.js.map

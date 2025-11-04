@@ -13,18 +13,22 @@ const sequelize = new sequelize_1.Sequelize(process.env.DB_NAME, process.env.DB_
     dialect: 'postgres',
     logging: false,
     dialectOptions: {
-        ssl: process.env.DB_SSL === 'true' ? {
-            require: true,
-            rejectUnauthorized: false
-        } : false,
+        ssl: process.env.DB_SSL === 'true'
+            ? {
+                require: true,
+                rejectUnauthorized: false,
+            }
+            : false,
     },
 });
 // Test and verify the database connection
-sequelize.authenticate()
+sequelize
+    .authenticate()
     .then(() => {
-    console.log(' Connected to Supabase PostgreSQL successfully.');
+    console.log('✅ Connected to Supabase PostgreSQL successfully.');
 })
     .catch((err) => {
-    console.error(' Failed to connect to Supabase PostgreSQL:', err.message);
+    console.error('❌ Failed to connect to Supabase PostgreSQL:', err.message);
 });
 exports.default = sequelize;
+//# sourceMappingURL=database.config.js.map

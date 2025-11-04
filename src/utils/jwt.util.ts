@@ -22,8 +22,9 @@ export const createToken = (data: CustomJwtPayload): string => {
   };
 
   const options: SignOptions = {
-    expiresIn: jwtConfig.ttl || '1d', // Default to 1 day if not set
+    expiresIn: (jwtConfig.ttl || "1d") as jwt.SignOptions["expiresIn"],
   };
+
 
   return jwt.sign(payload, jwtConfig.secret as string, options);
 };

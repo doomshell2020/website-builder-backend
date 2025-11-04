@@ -36,11 +36,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateProfileById = exports.logoutUser = exports.findUserById = exports.findUserByMobileForgot = exports.findUserByEmailForgot = exports.findUserByEmailLogin = exports.findUserByMobile = exports.findUserByEmail = exports.createUser = void 0;
+exports.updatedatabyid = exports.updateProfileById = exports.logoutUser = exports.findUserById = exports.findUserByMobileForgot = exports.findUserByEmailForgot = exports.findUserByEmailLogin = exports.findUserByMobile = exports.findUserByEmail = exports.createUser = void 0;
 // services/user.service.ts
 const index_1 = __importDefault(require("../../models/index")); // Make sure your model is loaded in `models/index.ts`
-const cacheUtil = __importStar(require("../../utils/cache.util"));
 const User = index_1.default.User;
+const cacheUtil = __importStar(require("../../utils/cache.util"));
 // Create user
 const createUser = async (req) => {
     const user = await User.create(req.body);
@@ -87,9 +87,27 @@ const logoutUser = async (token, exp) => {
 };
 exports.logoutUser = logoutUser;
 // Update profile by ID
-const updateProfileById = async (req, res) => {
-    const { name, email, mobile } = req.body;
-    const [updated] = await User.update({ name, email, mobile }, { where: { id: req.user.id } });
+const updateProfileById = async (data, id) => {
+    const { name, email, mobile, password } = data;
+    const [updated] = await User.update({ name, email, mobile, password }, { where: { id: id } });
     return updated > 0;
 };
 exports.updateProfileById = updateProfileById;
+const updatedatabyid = async (id, data) => {
+    try {
+        const [updatedCount, updatedRows] = await User.update(data, {
+            where: { id },
+            returning: true, // So you can get the updated record
+        });
+        if (updatedCount === 0) {
+            return null; // No user found or nothing updated
+        }
+        return updatedRows[0]; // Return updated user
+    }
+    catch (error) {
+        console.error("Error in updatedatabyid:", error);
+        throw error;
+    }
+};
+exports.updatedatabyid = updatedatabyid;
+//# sourceMappingURL=admin.service.js.map

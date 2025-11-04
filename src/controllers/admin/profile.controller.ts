@@ -26,7 +26,7 @@ export const FindUser = async (req: Request, res: Response) => {
 
 export const UpdateUser = async (req: Request, res: Response) => {
   try {
-    const userId = req?.user?.id;
+    const userId = (req as any)?.user?.id;
     const id = Number(req.params.id);
     if (!id) throw new apiErrors.BadRequestError("User ID is required.");
     if (id !== userId) {

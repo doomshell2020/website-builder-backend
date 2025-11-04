@@ -19,3 +19,4 @@ const ErrorHandler = (fn) => (req, res, next) => {
     });
 };
 exports.default = ErrorHandler;
+//# sourceMappingURL=error.middleware.js.map

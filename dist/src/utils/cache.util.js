@@ -23,3 +23,4 @@ const clear = () => {
     return keyv.clear();
 };
 exports.clear = clear;
+//# sourceMappingURL=cache.util.js.map
