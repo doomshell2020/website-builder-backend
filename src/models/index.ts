@@ -29,7 +29,7 @@ const loadModels = (sequelize: Sequelize): Record<string, ModelStatic<Model>> =>
 
 // Load base models once
 const baseModels = loadModels(require('../../config/database.config').default);
-console.log("baseModels",baseModels)
+// console.log("baseModels",baseModels)
 
 export default baseModels;
 

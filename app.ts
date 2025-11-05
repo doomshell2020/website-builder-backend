@@ -8,8 +8,7 @@ import AdminRouter from './src/routes/index';
 import { errorHandler, badJsonHandler } from './src/middleware/index';
 require('dotenv').config({ path: '.env.local' });
 const app = express();
-// ---------------------- Middleware ---------------------- //
-app.use(cors());
+
 const allowedOrigins = [
   "http://localhost:3000",
   "http://192.168.0.77:3000",
@@ -20,21 +19,14 @@ const allowedOrigins = [
   "https://navvistarinfra.doomshell.com",
   "https://website-builder-frontend-three.vercel.app",
   "https://api.doomshell.com",
+  "https://api.doomshell.com",
   process.env.SITE_URL,
 ];
-// app.use(cors({
-//   origin: "*",
-//   credentials: true,
-// }));
-
-// 🧭 Determine the correct upload path based on environment
 const UPLOAD_DIR =
   process.env.NODE_ENV === 'production'
     ? '/var/www/html/website-builder-backend/uploads'
     : path.join(process.cwd(), 'uploads');
-
 app.use('/uploads', express.static(UPLOAD_DIR));
-
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -47,7 +39,7 @@ app.use(
 
       // ✅ Allow any subdomain of webbuilder.local:3000
       // const subdomainRegex = /^http:\/\/([a-zA-Z0-9-]+)\.webbuilder\.local:3000$/;
-      const subdomainRegex = /^https?:\/\/([a-zA-Z0-9-]+)\.doomshell\.com$/;
+      const subdomainRegex = /^https?:\/\/([a-zA-Z0-9-]+)\.website-builder-frontend-three.vercel\.com$/;
       if (subdomainRegex.test(origin)) {
         return callback(null, true);
       }

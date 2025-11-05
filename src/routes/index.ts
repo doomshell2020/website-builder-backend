@@ -32,9 +32,9 @@ router.use('/static', setSchema as any, StaticRouter as any);
 router.use('/slider', setSchema as any, SliderRouter as any);
 router.use('/gallery', setSchema as any, GalleryRouter as any);
 router.use('/enquiries', setSchema as any, EnquiryRouter as any);
+router.use('/testimonials', setSchema as any, TestimonialRouter as any);
 
 router.use('/seo', setSchema as any, authMiddleware as any, SeoRouter as any);
-router.use('/testimonials', setSchema as any, authMiddleware as any, TestimonialRouter as any);
 router.use('/client-logos', setSchema as any, authMiddleware as any, ClientLogoRouter as any);
 router.use('/faq', setSchema as any, authMiddleware as any, FaqRouter as any);
 
