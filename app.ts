@@ -6,8 +6,12 @@ import cors from 'cors';
 import session from 'express-session';
 import AdminRouter from './src/routes/index';
 import { errorHandler, badJsonHandler } from './src/middleware/index';
+
 require('dotenv').config({ path: '.env.local' });
+
 const app = express();
+
+// ---------------------- Middleware ---------------------- //
 
 const allowedOrigins = [
   "http://localhost:3000",
@@ -19,14 +23,10 @@ const allowedOrigins = [
   "https://navvistarinfra.doomshell.com",
   "https://website-builder-frontend-three.vercel.app",
   "https://api.doomshell.com",
-  "https://api.doomshell.com",
   process.env.SITE_URL,
 ];
-const UPLOAD_DIR =
-  process.env.NODE_ENV === 'production'
-    ? '/var/www/html/website-builder-backend/uploads'
-    : path.join(process.cwd(), 'uploads');
-app.use('/uploads', express.static(UPLOAD_DIR));
+
+// ✅ CORS configuration (only this one, remove any extra app.use(cors()))
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -37,9 +37,8 @@ app.use(
         return callback(null, true);
       }
 
-      // ✅ Allow any subdomain of webbuilder.local:3000
-      // const subdomainRegex = /^http:\/\/([a-zA-Z0-9-]+)\.webbuilder\.local:3000$/;
-      const subdomainRegex = /^https?:\/\/([a-zA-Z0-9-]+)\.website-builder-frontend-three.vercel\.com$/;
+      // ✅ Allow any subdomain of website-builder-frontend-three.vercel.app
+      const subdomainRegex = /^https?:\/\/([a-zA-Z0-9-]+)\.website-builder-frontend-three\.vercel\.app$/;
       if (subdomainRegex.test(origin)) {
         return callback(null, true);
       }
@@ -50,27 +49,43 @@ app.use(
     credentials: true,
   })
 );
+
+// ---------------------- Static Files ---------------------- //
+const UPLOAD_DIR =
+  process.env.NODE_ENV === 'production'
+    ? '/var/www/html/website-builder-backend/uploads'
+    : path.join(process.cwd(), 'uploads');
+
+app.use('/uploads', express.static(UPLOAD_DIR));
+app.use(express.static(path.join(__dirname, 'public')));
+
+// ---------------------- Other Middleware ---------------------- //
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
-// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use(session({
-  secret: process.env.SESSION_SECRET!,
-  resave: false, saveUninitialized: true,
-  cookie: { secure: false }, // true if using HTTPS
-}));
 
-// Logging all requests
-app.use((req, res, next) => { console.log(`${req.method} ${req.originalUrl}`); next(); });
+// ---------------------- Session ---------------------- //
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'your-secret-key',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }, // set true if using HTTPS
+  })
+);
 
-// ---------------------- Routes ----------------------
-// Example: admin routes (can add authMiddleware per route or globally if needed)
+// ---------------------- Logging ---------------------- //
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.originalUrl}`);
+  next();
+});
+
+// ---------------------- Routes ---------------------- //
 app.use('/api', AdminRouter);
 // app.use('/api/v1/admin', authMiddleware, AdminRouter);
 
-// ---------------------- Error handlers ----------------------
+// ---------------------- Error handlers ---------------------- //
 app.use(badJsonHandler); // JSON validation errors
 app.use(errorHandler as any); // generic error handler
 
