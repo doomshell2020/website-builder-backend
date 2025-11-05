@@ -11,7 +11,8 @@ exports.schemaModelMap = new Map();
 const loadModels = (sequelize) => {
     const models = {};
     const modelsPath = path_1.default.join(__dirname);
-    const modelFiles = glob_1.default.sync(path_1.default.join(modelsPath, '**/*.model.ts'));
+    // const modelFiles = glob.sync(path.join(modelsPath, '**/*.model.ts'));
+    const modelFiles = glob_1.default.sync(path_1.default.join(modelsPath, '**/*.model.@(ts|js)'));
     for (const file of modelFiles) {
         const modelModule = require(file);
         const modelFactory = modelModule.default || modelModule;
@@ -27,6 +28,7 @@ const loadModels = (sequelize) => {
 };
 // Load base models once
 const baseModels = loadModels(require('../../config/database.config').default);
+console.log("baseModels", baseModels);
 exports.default = baseModels;
 // {/** To separate the user.model.ts  */}
 // import { Sequelize, DataTypes, Model, ModelStatic } from 'sequelize';

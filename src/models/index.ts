@@ -7,7 +7,9 @@ export const schemaModelMap = new Map<string, Record<string, ModelStatic<Model>>
 const loadModels = (sequelize: Sequelize): Record<string, ModelStatic<Model>> => {
   const models: Record<string, ModelStatic<Model>> = {};
   const modelsPath = path.join(__dirname);
-  const modelFiles = glob.sync(path.join(modelsPath, '**/*.model.ts'));
+  // const modelFiles = glob.sync(path.join(modelsPath, '**/*.model.ts'));
+  const modelFiles = glob.sync(path.join(modelsPath, '**/*.model.@(ts|js)'));
+
 
   for (const file of modelFiles) {
     const modelModule = require(file);
@@ -27,6 +29,7 @@ const loadModels = (sequelize: Sequelize): Record<string, ModelStatic<Model>> =>
 
 // Load base models once
 const baseModels = loadModels(require('../../config/database.config').default);
+console.log("baseModels",baseModels)
 
 export default baseModels;
 
