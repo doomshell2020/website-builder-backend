@@ -23,9 +23,9 @@ const allowedOrigins = [
   "https://navvistarinfra.doomshell.com",
   "https://website-builder-frontend-three.vercel.app",
   "https://api.doomshell.com",
+  "https://jaipurfoodcaterers.doomshell.com",
   process.env.SITE_URL,
 ];
-
 // ✅ CORS configuration (only this one, remove any extra app.use(cors()))
 app.use(
   cors({
@@ -38,7 +38,8 @@ app.use(
       }
 
       // ✅ Allow any subdomain of website-builder-frontend-three.vercel.app
-      const subdomainRegex = /^https?:\/\/([a-zA-Z0-9-]+)\.website-builder-frontend-three\.vercel\.app$/;
+      const subdomainRegex = /^https?:\/\/([a-zA-Z0-9-]+)\.(website-builder-frontend-three\.vercel\.app|doomshell\.com)$/;
+
       if (subdomainRegex.test(origin)) {
         return callback(null, true);
       }
