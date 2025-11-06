@@ -19,6 +19,7 @@ const allowedOrigins = [
   "http://localhost:5002",
   "http://webbuilder.local:3000",
   "https://navlok.doomshell.com",
+  "https://navlokcolonizers.com",
   "https://www.navlokcolonizers.com",
   "https://navvistarinfra.doomshell.com",
   "https://website-builder-frontend-three.vercel.app",
