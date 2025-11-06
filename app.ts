@@ -39,7 +39,7 @@ app.use(
       }
 
       // ✅ Allow any subdomain of website-builder-frontend-three.vercel.app
-      const subdomainRegex = /^https?:\/\/([a-zA-Z0-9-]+)\.(website-builder-frontend-three\.vercel\.app|doomshell\.com)$/;
+      const subdomainRegex = /^https?:\/\/([a-zA-Z0-9-]+)\.(website-builder-frontend-three\.vercel\.app|doomshell\.com|navlokcolonizers\.com)$/ ;
       // const subdomainRegex = /^https?:\/\/([a-zA-Z0-9-]+)\.website-builder-frontend-three\.vercel\.app$/
 
       if (subdomainRegex.test(origin)) {
