@@ -51,7 +51,7 @@ export default (sequelize: Sequelize) => {
       office_no: { type: DataTypes.STRING(250), allowNull: true },
       fax_no: { type: DataTypes.STRING(250), allowNull: true },
       company_name: { type: DataTypes.STRING(255), allowNull: false },
-      role: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 3, references: { model: "cms_role", key: "id" } },
+      role: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 2, references: { model: "cms_role", key: "id" } },
       website_type: { type: DataTypes.INTEGER, allowNull: false, references: { model: "website_type", key: "id" } },
       fburl: { type: DataTypes.STRING(250), allowNull: true },
       xurl: { type: DataTypes.STRING(250), allowNull: true },

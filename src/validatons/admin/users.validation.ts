@@ -8,7 +8,7 @@ export const cmsUserSchema = Joi.object({
   office_no: Joi.string().max(20).allow(null, ""),
   fax_no: Joi.string().max(20).allow(null, ""),
   company_name: Joi.string().max(255).required(),
-  role: Joi.number().integer().required(),
+  role: Joi.number().integer().optional().default("2"),
   website_type: Joi.number().integer().required(),
   fburl: Joi.string().uri().max(250).allow(null, ""),
   xurl: Joi.string().uri().max(250).allow(null, ""),

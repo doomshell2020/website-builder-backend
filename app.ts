@@ -12,7 +12,6 @@ require('dotenv').config({ path: '.env.local' });
 const app = express();
 
 // ---------------------- Middleware ---------------------- //
-
 const allowedOrigins = [
   "http://localhost:3000",
   "http://192.168.0.77:3000",
@@ -20,6 +19,7 @@ const allowedOrigins = [
   "http://localhost:5002",
   "http://webbuilder.local:3000",
   "https://navlok.doomshell.com",
+  "https://www.navlokcolonizers.com",
   "https://navvistarinfra.doomshell.com",
   "https://website-builder-frontend-three.vercel.app",
   "https://api.doomshell.com",
@@ -39,6 +39,7 @@ app.use(
 
       // ✅ Allow any subdomain of website-builder-frontend-three.vercel.app
       const subdomainRegex = /^https?:\/\/([a-zA-Z0-9-]+)\.(website-builder-frontend-three\.vercel\.app|doomshell\.com)$/;
+      // const subdomainRegex = /^https?:\/\/([a-zA-Z0-9-]+)\.website-builder-frontend-three\.vercel\.app$/
 
       if (subdomainRegex.test(origin)) {
         return callback(null, true);
