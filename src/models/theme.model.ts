@@ -2,7 +2,15 @@ import { Model, DataTypes, Sequelize } from "sequelize";
 
 export default (sequelize: Sequelize) => {
 
-    class Theme extends Model { }
+    class Theme extends Model {
+        static associate(db: any) {
+            // 1️⃣ One Theme can be used by many Users
+            Theme.hasMany(db.User, {
+                foreignKey: "website_type", // must match the foreignKey in User.belongsTo
+                as: "Users", // alias for eager loading
+            });
+        }
+    }
 
     Theme.init(
         {

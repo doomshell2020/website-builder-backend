@@ -1,13 +1,20 @@
 import db from "../../models/index";
 import { Op } from "sequelize";
 import { apiErrors } from '../../utils/api-errors';
-const { Theme } = db;
+const { Theme, User } = db;
 
 export const findTheme = async (page: number, limit: number) => {
     try {
         const { count, rows } = await Theme.findAndCountAll({
             where: { status: 'Y' },
             order: [["createdAt", "ASC"]],
+            include: [
+                {
+                    model: User,
+                    as: "Users",
+                    attributes: ["id", "name", "email", "website_type"],
+                },
+            ],
         });
         return { data: rows, page, limit, total: count, totalPages: Math.ceil(count / limit) };
     } catch (error) {
@@ -18,7 +25,16 @@ export const findTheme = async (page: number, limit: number) => {
 
 export const findThemeById = async (id: string) => {
     try {
-        const webTypeData = await Theme.findOne({ where: { id: id } });
+        const webTypeData = await Theme.findOne({
+            where: { id },
+            include: [
+                {
+                    model: User,
+                    as: "Users",
+                    attributes: ["id", "name", "email", "website_type"],
+                },
+            ],
+        });
         if (!webTypeData) {
             throw new apiErrors.BadRequestError("Theme not exists.");
         }
@@ -55,6 +71,13 @@ export const findAllTheme = async (page: number, limit: number) => {
         offset,
         limit: limitNumber,
         order: [['createdAt', 'DESC']],
+        include: [
+            {
+                model: User,
+                as: "Users",
+                attributes: ["id", "name", "email", "website_type"],
+            },
+        ],
     });
 
     return {

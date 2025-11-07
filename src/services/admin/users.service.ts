@@ -29,7 +29,6 @@ const deleteFile = (filename?: string) => {
 };
 
 // ====== USER SERVICES ======
-
 export const findAllUsers = async (params: PaginationParams) => {
   const { pageNumber, limitNumber, offset } = parsePagination(params);
   const { count, rows } = await User.findAndCountAll({
@@ -248,29 +247,6 @@ export const findUserById = async (id: string | number) => {
   });
 };
 
-export const findProject = async (projectName: string) => {
-  return await User.findOne({
-    where: {
-      company_name: {
-        [Op.like]: projectName, // case-insensitive match
-      },
-    },
-    include: [
-      {
-        model: Role,
-        as: 'roleData',
-        attributes: ['id', 'name', 'description'],
-      },
-      {
-        model: Theme,
-        as: 'Theme',
-        attributes: ['id', 'name', 'description'],
-      },
-    ],
-  });
-};
-
-
 export const updateUser = async (id: number, req: any) => {
   const { body, files } = req;
   const { oldSchemaName, newSchemaName } = req.body;
@@ -451,3 +427,4 @@ export const approveUser = async (id: string, req: any) => {
     };
   }
 };
+

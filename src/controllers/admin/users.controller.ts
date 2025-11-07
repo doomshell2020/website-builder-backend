@@ -132,22 +132,6 @@ export const FindUser = async (req: Request, res: Response) => {
   }
 };
 
-// ===== FIND PROJECT =====
-export const FindProject = async (req: Request, res: Response) => {
-  try {
-    const projectName = req.params.name;
-    if (!projectName) throw new apiErrors.NotFoundError("Company name not inserted.");
-
-    const project: any = await UserService.findProject(projectName);
-    if (!project) throw new apiErrors.BadRequestError("Company not found.");
-
-    const response = successResponse("Company found successfully.", project);
-    return res.status(response.statusCode).json(response.body);
-  } catch (error: any) {
-    return res.status(500).json({ status: false, message: error.message || "Internal Server Error" });
-  }
-};
-
 // ===== UPDATE USER STATUS =====
 export const UpdateStatusUser = async (req: Request, res: Response) => {
   try {

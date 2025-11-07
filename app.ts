@@ -6,50 +6,44 @@ import cors from 'cors';
 import session from 'express-session';
 import AdminRouter from './src/routes/index';
 import { errorHandler, badJsonHandler } from './src/middleware/index';
-
 require('dotenv').config({ path: '.env.local' });
 
 const app = express();
 
-// ---------------------- Middleware ---------------------- //
-const allowedOrigins = [
-  "http://localhost:3000",
-  "http://192.168.0.77:3000",
-  "http://192.168.0.77:5000",
-  "http://localhost:5002",
-  "http://webbuilder.local:3000",
-  "https://navlok.doomshell.com",
-  "https://navlokcolonizers.com",
-  "https://www.navlokcolonizers.com",
-  "https://navvistarinfra.doomshell.com",
-  "https://website-builder-frontend-three.vercel.app",
-  "https://api.doomshell.com",
-  "https://jaipurfoodcaterers.doomshell.com",
-  process.env.SITE_URL,
-];
-// ✅ CORS configuration (only this one, remove any extra app.use(cors()))
+// ---------------------- CORS (Allow Origins) ---------------------- //
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true); // Allow server-to-server or Postman requests
+    origin: function (origin, callback) {
+      // Allow Postman, server-to-server, or same-origin requests
+      if (!origin) return callback(null, true);
 
-      // ✅ Allow fixed origins
-      if (allowedOrigins.includes(origin)) {
+      try {
+        const url = new URL(origin);
+        const hostname = url.hostname;
+
+        // ✅ Allow main domains
+        if (
+          hostname === "baaraat.com" ||
+          hostname === "www.baaraat.com" ||
+          hostname.endsWith(".baaraat.com") || // subdomains
+          hostname.endsWith(".webbuilder.local") || // local subdomains
+          hostname.endsWith(".vercel.app") || // Vercel preview deployments
+          hostname.endsWith(".doomshell.com") || // API/infra
+          hostname.match(/^[a-zA-Z0-9-]+\.local(:\d+)?$/) // local virtual domains like jaipurfoodcaterers.local:3000
+        ) {
+          return callback(null, true);
+        }
+
+        // ✅ Allow verified custom domains (e.g. jaipurfoodcaterers.com)
+        // In production, you could check from DB if this domain belongs to a registered company
         return callback(null, true);
+
+      } catch (e) {
+        console.log("❌ Invalid origin:", origin);
+        return callback(new Error("Not allowed by CORS"));
       }
-
-      // ✅ Allow any subdomain of website-builder-frontend-three.vercel.app
-      const subdomainRegex = /^https?:\/\/([a-zA-Z0-9-]+)\.(website-builder-frontend-three\.vercel\.app|doomshell\.com|navlokcolonizers\.com)$/ ;
-      // const subdomainRegex = /^https?:\/\/([a-zA-Z0-9-]+)\.website-builder-frontend-three\.vercel\.app$/
-
-      if (subdomainRegex.test(origin)) {
-        return callback(null, true);
-      }
-
-      // ❌ Otherwise, block it
-      return callback(new Error("Not allowed by CORS: " + origin));
     },
-    credentials: true,
+    credentials: true, // ✅ needed for cookies/sessions
   })
 );
 
@@ -74,7 +68,7 @@ app.use(
     secret: process.env.SESSION_SECRET || 'your-secret-key',
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }, // set true if using HTTPS
+    cookie: { secure: false },
   })
 );
 
@@ -86,7 +80,6 @@ app.use((req, res, next) => {
 
 // ---------------------- Routes ---------------------- //
 app.use('/api', AdminRouter);
-// app.use('/api/v1/admin', authMiddleware, AdminRouter);
 
 // ---------------------- Error handlers ---------------------- //
 app.use(badJsonHandler); // JSON validation errors

@@ -9,8 +9,8 @@ import { setSchema } from '../middleware/setSchema.middleware';
 import * as ProfileController from '../controllers/admin/profile.controller';
 import recaptchaRoutes from './admin/reCAPTCHA.router';
 import UsersRouter from './admin/users.router';
-import * as UsersController from '../controllers/admin/users.controller';
 import SchemaRouter from './admin/schema.routes';
+import ProjectRouter from './admin/project.router';
 import StaticRouter from './admin/static.router';
 import SliderRouter from './admin/slider.router';
 import GalleryRouter from './admin/gallery.router';
@@ -33,9 +33,9 @@ router.use('/slider', setSchema as any, SliderRouter as any);
 router.use('/gallery', setSchema as any, GalleryRouter as any);
 router.use('/enquiries', setSchema as any, EnquiryRouter as any);
 router.use('/testimonials', setSchema as any, TestimonialRouter as any);
+router.use('/client-logos', setSchema as any, ClientLogoRouter as any);
 
 router.use('/seo', setSchema as any, authMiddleware as any, SeoRouter as any);
-router.use('/client-logos', setSchema as any, authMiddleware as any, ClientLogoRouter as any);
 router.use('/faq', setSchema as any, authMiddleware as any, FaqRouter as any);
 
 // Admin login route with validation and error handling
@@ -44,7 +44,7 @@ router.post('/auth/login', validate(schema.login) as any, ErrorHandler(AuthContr
 // router.post('/register', ErrorHandler(AuthController.register as any));
 router.get('/profile', authMiddleware as any, ErrorHandler(ProfileController.FindUser));
 router.use('/update-profile', authMiddleware as any, UsersRouter as any);
-router.get('/company/view-company/:name', ErrorHandler(UsersController.FindProject as any));
+router.use('/company', ProjectRouter);
 
 // Catch-all route for undefined paths (404 handler)
 router.all('*', (req, res) => { res.status(404).json({ status: false, message: 'Path not found..!' }); });
