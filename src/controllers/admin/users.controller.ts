@@ -22,13 +22,21 @@ const deleteUploadedFile = (filename?: string) => {
 // ===== CREATE USER =====
 export const CreateUser = async (req: Request, res: Response) => {
   try {
-    const { email, role } = req.body;
+    const { email, role, company_name } = req.body;
     const existingUser: any = await UserService.findUserByEmail(email);
 
     if (existingUser) {
       const hasFiles = req.file || (req.files && Object.keys(req.files).length > 0);
       if (hasFiles) await deleteUploadedFilesFromReq(req);
       throw new apiErrors.BadRequestError("A user with this email already exists.");
+    }
+
+    const existingCompany: any = await UserService.findCompanyName(company_name);
+
+    if (existingCompany) {
+      const hasFiles = req.file || (req.files && Object.keys(req.files).length > 0);
+      if (hasFiles) await deleteUploadedFilesFromReq(req);
+      throw new apiErrors.BadRequestError("A company with this name already exists.");
     }
 
     const userDetails: any = await UserService.createUser(req);
@@ -86,7 +94,17 @@ export const FindAllAdmins = async (req: Request, res: Response) => {
 export const UpdateUser = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
+    const { company_name } = req.body;
+
     if (!id) throw new apiErrors.BadRequestError("User ID is required.");
+
+    const existingCompany: any = await UserService.findCompanyName(company_name, id);
+
+    if (existingCompany) {
+      const hasFiles = req.file || (req.files && Object.keys(req.files).length > 0);
+      if (hasFiles) await deleteUploadedFilesFromReq(req);
+      throw new apiErrors.BadRequestError("A company with this name already exists.");
+    }
 
     const updatedUser = await UserService.updateUser(id, req);
     return res.json({

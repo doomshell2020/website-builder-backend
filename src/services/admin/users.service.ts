@@ -228,6 +228,17 @@ export const findUserByEmail = async (email: string) => {
   });
 }
 
+export const findCompanyName = async (company_name: string, id?: number) => {
+  const company = await User.findOne({
+    where: {
+      company_name,
+      ...(id && { id: { [Op.ne]: id } }), // exclude self if provided
+    },
+  });
+
+  return company;
+};
+
 export const findUserById = async (id: string | number) => {
   return await User.findByPk(id, {
     include: [
