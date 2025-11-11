@@ -429,3 +429,33 @@ export const approveUser = async (id: string, req: any) => {
   }
 };
 
+
+export const saveDomain = async (id: number, req: any) => {
+  const { www_domain } = req.body;
+
+  const existingUser: any = await User.findByPk(id);
+  if (!existingUser) {
+    throw new Error("User not found.");
+  }
+
+  // if (existingUser?.approval === "N") {
+  //   throw new Error("This user is not approved to update.");
+  // }
+
+  const updateData = {
+    custom_domain: www_domain,
+    updatedAt: new Date(),
+  };
+
+  await User.update(updateData, { where: { id } });
+  return await User.findByPk(id);
+};
+
+export const removeDomain = async (id: number) => {
+  if (!id) throw new Error("Invalid user ID");
+
+  const user = await User.findByPk(id);
+  if (!user) throw new Error("User not found");
+  await User.update({ custom_domain: null, updatedAt: new Date() }, { where: { id } });
+  return await User.findByPk(id);
+};

@@ -32,11 +32,17 @@ router.delete("/delete/:id", ErrorHandler(UserController.DeleteUser as any));
 // ===== UPDATE USER STATUS =====
 router.patch("/status/:id", ErrorHandler(UserController.UpdateStatusUser as any));
 
-// ===== UPDATE USER STATUS =====
-router.patch("/approve/:id", ErrorHandler(UserController.ApproveUserForThereTenantShip as any));
-
 // ===== DELETE USER =====
 router.get('/search', ErrorHandler(UserController.SearchUser as any));
+
+// ===== APPROVE USER FOR USE DB =====
+router.patch("/approve/:id", ErrorHandler(UserController.ApproveUserForThereTenantShip as any));
+
+// ===== CREATE CUSTOM DOMAIN =====
+router.put("/save/custom-domain/:id", ErrorHandler(UserController.SaveDomain as any));
+
+// ===== DELETE CUSTOM DOMAIN =====
+router.put("/remove/custom-domain/:id", ErrorHandler(UserController.RemoveDomain as any));
 
 // ===== 404 FALLBACK =====
 router.all("*", (req, res) => { res.status(404).json({ status: false, message: "Path not found!" }); });

@@ -53,6 +53,7 @@ export default (sequelize: Sequelize) => {
       office_no: { type: DataTypes.STRING(250), allowNull: true },
       fax_no: { type: DataTypes.STRING(250), allowNull: true },
       company_name: { type: DataTypes.STRING(255), allowNull: false },
+      custom_domain: { type: DataTypes.STRING(50), allowNull: true },
       schema_name: { type: DataTypes.STRING(50), allowNull: false },
       subdomain: { type: DataTypes.STRING(100), allowNull: false },
       role: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 2, references: { model: "cms_role", key: "id" } },
@@ -83,6 +84,6 @@ export default (sequelize: Sequelize) => {
       underscored: false,
     }
   );
-  
+
   return User;
 };

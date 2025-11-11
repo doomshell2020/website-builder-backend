@@ -211,3 +211,50 @@ export const SearchUser = async (req: Request, res: Response): Promise<any> => {
     return res.status(500).json({ status: false, message: 'Internal Server Error' });
   }
 };
+
+// ===== UPDATE CUSTOM DOMAIN =====
+export const SaveDomain = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    if (!id) throw new apiErrors.BadRequestError("User ID is required.");
+
+    const domainDetail = await UserService.saveDomain(id, req);
+
+    if (!domainDetail) {
+      return res.status(400).json({ status: false, message: "Custom domain update failed!" });
+    }
+
+    return res.status(200).json({
+      status: true,
+      message: "Custom domain added successfully!",
+      data: domainDetail,
+    });
+  } catch (error: any) {
+    console.error("SaveDomain Error:", error?.message);
+    return res.status(500).json({
+      status: false,
+      message: error?.message || "Internal Server Error",
+    });
+  }
+};
+
+// ===== REMOVE CUSTOM DOMAIN =====
+export const RemoveDomain = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    if (!id) throw new apiErrors.BadRequestError("User ID is required.");
+
+    const result = await UserService.removeDomain(id);
+
+    return res.status(200).json({
+      status: true,
+      message: "Custom domain deleted successfully.",
+    });
+  } catch (error: any) {
+    console.error("RemoveDomain Error:", error?.message);
+    return res.status(500).json({
+      status: false,
+      message: error?.message || "Internal Server Error",
+    });
+  }
+};
