@@ -1,7 +1,7 @@
 import express, { Router } from 'express';
 import * as SliderController from '../../controllers/admin/slider.controller';
 import ErrorHandler from '../../middleware/error.middleware';
-import * as schema from '../../validatons/admin/slider.validation';
+import * as schema from '../../validations/admin/slider.validation';
 import validateWithCleanup from '../../utils/validatorWithCleanup.util';
 import createUploader from '../../middleware/uploadMiddleware';
 const router: Router = express.Router();

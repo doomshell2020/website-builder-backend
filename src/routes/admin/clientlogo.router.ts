@@ -1,7 +1,7 @@
 import express, { Router } from 'express';
 import * as ClientLogoController from '../../controllers/admin/clientlogo.controller';
 import ErrorHandler from '../../middleware/error.middleware';
-import * as schema from '../../validatons/admin/clientlogo.validation';
+import * as schema from '../../validations/admin/clientlogo.validation';
 import validateWithCleanup from '../../utils/validatorWithCleanup.util';
 import createUploader from '../../middleware/uploadMiddleware';
 const router: Router = express.Router();

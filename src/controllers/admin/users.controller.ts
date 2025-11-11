@@ -59,7 +59,7 @@ export const CreateUser = async (req: Request, res: Response) => {
 };
 
 // ===== GET ALL USERS =====
-export const UsersfindAll = async (req: Request, res: Response) => {
+export const UsersFindAll = async (req: Request, res: Response) => {
   try {
     const users = await UserService.findAllUsers(req.query as any);
     const response = successResponse("Users found successfully", users);

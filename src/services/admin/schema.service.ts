@@ -545,7 +545,7 @@ export const getAllSchemas = async (page = 1, limit = 10) => {
       const [usersResult]: any = await sequelize.query(`
         SELECT id, name, email, mobile_no, "createdAt"
         FROM public.cms_users
-        WHERE company_name = '${schemaName}'
+        WHERE schema_name = '${schemaName}'
       `);
 
       schemas.push({

@@ -5,7 +5,7 @@ const { User, Role, Theme } = db;
 export const findProject = async (projectName: string) => {
     return await User.findOne({
         where: {
-            company_name: { [Op.like]: projectName },
+            schema_name: { [Op.like]: projectName },
             approval: 'Y',
             status: 'Y',
         },
@@ -37,7 +37,7 @@ export const findProjectByDomain = async (domain: string) => {
         const project = await User.findOne({
             where: {
                 [Op.or]: [
-                    { company_name: { [Op.iLike]: cleanDomain } }, // domain stored directly
+                    { schema_name: { [Op.iLike]: cleanDomain } }, // domain stored directly
                     // { domain: { [Op.iLike]: cleanDomain } },       // real domain field
                     // { subdomain: { [Op.iLike]: subdomain || "" } },// subdomain match
                 ],

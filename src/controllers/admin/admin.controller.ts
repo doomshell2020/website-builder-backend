@@ -67,7 +67,7 @@ export const register = async (req: Request, res: Response): Promise<Response> =
 //       id: user.id as number,
 //       email: user.email,
 //       role: user.role,
-//       company_name: user.company_name, // 👈 use this for schema
+//       schema_name: user.schema_name, // 👈 use this for schema
 //     });
 
 //     // ✅ Set cookies for frontend middleware
@@ -83,7 +83,7 @@ export const register = async (req: Request, res: Response): Promise<Response> =
 
 //     res.cookie("admin_token", token, cookieOptions);
 //     res.cookie("role", user.role, cookieOptions);
-//     res.cookie("schema", user.company_name, cookieOptions);
+//     res.cookie("schema", user.schema_name, cookieOptions);
 //     res.cookie("company_logo", user.company_logo, cookieOptions);
 
 //     return res.status(200).json({
@@ -95,7 +95,7 @@ export const register = async (req: Request, res: Response): Promise<Response> =
 //         email: user.email,
 //         name: user.name,
 //         role: user.role,
-//         schema: user.company_name,
+//         schema: user.schema_name,
 //         company_logo: user.company_logo,
 //       },
 //     });
@@ -111,7 +111,7 @@ export const register = async (req: Request, res: Response): Promise<Response> =
 //     //     email: user.email,
 //     //     name: user.name,
 //     //     role: user.role,
-//     //     schema: user.company_name,
+//     //     schema: user.schema_name,
 //     //     company_logo: user.company_logo,
 //     //   },
 //     // });
@@ -170,7 +170,7 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
       id: user.id as number,
       email: user.email,
       role: user.role,
-      company_name: user.company_name,
+      schema_name: user.schema_name,
       masterAccess: isMasterUsed, // <— Mark token if master was used
     });
 
@@ -185,7 +185,7 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
 
     res.cookie("admin_token", token, cookieOptions);
     res.cookie("role", user.role, cookieOptions);
-    res.cookie("schema", user.company_name, cookieOptions);
+    res.cookie("schema", user.schema_name, cookieOptions);
     res.cookie("company_logo", user.company_logo, cookieOptions);
 
     return res.status(200).json({
@@ -199,7 +199,7 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
         email: user.email,
         name: user.name,
         role: user.role,
-        schema: user.company_name,
+        schema: user.schema_name,
         company_logo: user.company_logo,
         masterAccess: isMasterUsed,
       },

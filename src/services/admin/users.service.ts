@@ -76,11 +76,10 @@ export const fetchAllAdmin = async (params: PaginationParams) => {
 };
 
 export const createUser = async (req: any) => {
-  const { body, files } = req;
-  const companyName = body.company_name
+  const { body, file } = req;
 
-  const image = files?.image?.[0]?.filename || null;
-  const companyLogo = files?.company_logo?.[0]?.filename || null;
+  const companyLogo = file?.filename || null;
+  console.log("companyLogo: ", companyLogo);
   const hashedPassword = await bcryptUtil.createHash(body.password);
 
   const newUser = await User.create({
@@ -88,7 +87,6 @@ export const createUser = async (req: any) => {
     status: 'N',
     approval: 'N',
     password: hashedPassword,
-    image,
     company_logo: companyLogo,
   });
 
@@ -248,32 +246,28 @@ export const findUserById = async (id: string | number) => {
 };
 
 export const updateUser = async (id: number, req: any) => {
-  const { body, files } = req;
+  const { body, file } = req;
   const { oldSchemaName, newSchemaName } = req.body;
 
-  const newImage = files?.image?.[0]?.filename || null;
-  const newCompanyLogo = files?.company_logo?.[0]?.filename || null;
+  const newCompanyLogo = file?.filename || null;
 
   const existing: any = await User.findOne({
     where: { email: body.email, id: { [Op.ne]: id } },
   });
 
   if (existing) {
-    if (newImage) deleteFile(newImage);
     if (newCompanyLogo) deleteFile(newCompanyLogo);
     throw new Error("This email is already used by another user.");
   }
 
   // new add to approvals
   if (existing?.approval == 'N') {
-    if (newImage) deleteFile(newImage);
     if (newCompanyLogo) deleteFile(newCompanyLogo);
     throw new Error("This your is not approved to update.");
   }
 
   const currentUser: any = await User.findByPk(id);
   if (!currentUser) {
-    if (newImage) deleteFile(newImage);
     if (newCompanyLogo) deleteFile(newCompanyLogo);
     throw new Error("User not found.");
   }
@@ -282,10 +276,7 @@ export const updateUser = async (id: number, req: any) => {
     ...body,
     updatedAt: new Date(),
   };
-  if (newImage) {
-    updateData.image = newImage;
-    if (currentUser.image) deleteFile(currentUser.image);
-  }
+
   if (newCompanyLogo) {
     updateData.company_logo = newCompanyLogo;
     if (currentUser.company_logo) deleteFile(currentUser.company_logo);
@@ -316,9 +307,9 @@ export const deleteUserById = async (id: number): Promise<boolean> => {
     throw new Error('User not found');
   }
 
-  // Delete user's schema if company_name exists
-  if (userData.company_name) {
-    const schemaName = userData.company_name;
+  // Delete user's schema if schema_name exists
+  if (userData.schema_name) {
+    const schemaName = userData.schema_name;
 
     // Prevent accidental deletion of critical schemas
     if (['public', 'information_schema', 'pg_catalog'].includes(schemaName)) {
@@ -334,7 +325,6 @@ export const deleteUserById = async (id: number): Promise<boolean> => {
   }
 
   // Delete uploaded files
-  if (userData.image) deleteFile(userData.image);
   if (userData.company_logo) deleteFile(userData.company_logo);
 
   // Delete user record

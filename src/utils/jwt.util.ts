@@ -6,7 +6,7 @@ export interface CustomJwtPayload extends JwtPayload {
   id: number;
   email: string;
   role?: number;
-  company_name?: string;   // 👈 your field (used as schema name)
+  schema_name?: string;   // 👈 your field (used as schema name)
   [key: string]: any;
 }
 
@@ -18,7 +18,7 @@ export const createToken = (data: CustomJwtPayload): string => {
     id: data.id,
     email: data.email,
     role: data.role,
-    company_name: data.company_name,
+    schema_name: data.schema_name,
   };
 
   const options: SignOptions = {
@@ -37,8 +37,8 @@ export const verifyToken = (token: string): CustomJwtPayload => {
   const decoded = jwt.verify(token, jwtConfig.secret as string, options) as CustomJwtPayload;
 
   // 👇 Normalize schema reference for easy access everywhere
-  if (decoded.company_name && !decoded.tenant_schema) {
-    decoded.tenant_schema = decoded.company_name;
+  if (decoded.schema_name && !decoded.tenant_schema) {
+    decoded.tenant_schema = decoded.schema_name;
   }
 
   return decoded;

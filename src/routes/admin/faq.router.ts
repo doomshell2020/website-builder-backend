@@ -2,7 +2,7 @@ import express, { Router } from "express";
 import * as FAQController from "../../controllers/admin/faq.controller";
 import ErrorHandler from "../../middleware/error.middleware";
 import validate from "../../utils/validator.util";
-import * as schema from "../../validatons/admin/faqs.validation";
+import * as schema from "../../validations/admin/faqs.validation";
 
 const router: Router = express.Router();
 

@@ -1,7 +1,7 @@
 import express, { Router } from 'express';
 import * as StaticController from '../../controllers/admin/static.controller';
 import ErrorHandler from '../../middleware/error.middleware';
-import * as schema from '../../validatons/admin/static.validation';
+import * as schema from '../../validations/admin/static.validation';
 import validate from '../../utils/validator.util';
 const router: Router = express.Router();
 

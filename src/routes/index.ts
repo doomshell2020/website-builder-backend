@@ -1,7 +1,7 @@
 import express, { Router } from 'express';
 import * as AuthController from '../controllers/admin/admin.controller';
 import ErrorHandler from '../middleware/error.middleware';
-import schema from '../validatons/admin/admin.validation';
+import schema from '../validations/admin/admin.validation';
 import validate from '../utils/validator.util';
 import { authMiddleware } from '../middleware/auth.middleware';
 import { authorizeRole } from '../middleware/role.middleware';

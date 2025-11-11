@@ -1,7 +1,7 @@
 import express, { Router } from 'express';
 import * as EnquiryController from '../../controllers/admin/enquiry.controller';
 import ErrorHandler from '../../middleware/error.middleware';
-import * as schema from '../../validatons/admin/enquiry.validation';
+import * as schema from '../../validations/admin/enquiry.validation';
 import validate from '../../utils/validator.util';
 const router: Router = express.Router();
 

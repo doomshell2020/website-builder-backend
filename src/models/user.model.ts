@@ -9,6 +9,8 @@ interface CmsUserAttributes {
   office_no?: string | null;
   fax_no?: string | null;
   company_name: string;
+  schema_name: string;
+  subdomain: string;
   role: number;
   fburl?: string | null;
   xurl?: string | null;
@@ -51,6 +53,8 @@ export default (sequelize: Sequelize) => {
       office_no: { type: DataTypes.STRING(250), allowNull: true },
       fax_no: { type: DataTypes.STRING(250), allowNull: true },
       company_name: { type: DataTypes.STRING(255), allowNull: false },
+      schema_name: { type: DataTypes.STRING(50), allowNull: false },
+      subdomain: { type: DataTypes.STRING(100), allowNull: false },
       role: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 2, references: { model: "cms_role", key: "id" } },
       website_type: { type: DataTypes.INTEGER, allowNull: false, references: { model: "website_type", key: "id" } },
       fburl: { type: DataTypes.STRING(250), allowNull: true },
@@ -79,5 +83,6 @@ export default (sequelize: Sequelize) => {
       underscored: false,
     }
   );
+  
   return User;
 };
