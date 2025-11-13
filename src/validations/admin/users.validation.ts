@@ -26,12 +26,12 @@ export const cmsUserSchema = Joi.object({
   status: Joi.string().valid("Y", "N").default("Y"),
   deleted: Joi.string().valid("Y", "N").default("N"),
   approval: Joi.string().valid("Y", "N").default("N"),
+  imagefolder: Joi.string().max(255).allow(null, ""),
+  imageFolder: Joi.string().max(255).allow(null, ""),
 });
 
 export const editCmsUserSchema = cmsUserSchema.fork(Object.keys(cmsUserSchema.describe().keys), (field) => field.optional());
 
-// export const UpdateUser = Joi.object({
-//   name: Joi.string().max(200).optional(),
 //   email: Joi.string().email().max(200).optional(),
 //   password: Joi.string().min(6).max(200).optional(),
 //   mobile: Joi.string().max(20).optional().allow(null, ''),

@@ -1,30 +1,5 @@
 import db from '../../models/index';
-import fs from 'fs';
-import path from 'path';
-
-// 🔧 Helper to safely delete a single file
-const deleteFile = (filename?: string) => {
-    if (!filename) return;
-    const filePath = path.join(process.cwd(), "uploads", filename);
-    if (fs.existsSync(filePath)) {
-        try {
-            fs.unlinkSync(filePath);
-            console.log(`🗑️ Deleted file: ${filename}`);
-        } catch (err) {
-            console.error(`❌ Failed to delete file ${filename}:`, err);
-        }
-    } else {
-        console.warn(`⚠️ File not found: ${filePath}`);
-    }
-};
-
-// 🔧 Helper to delete multiple files (array)
-const deleteFiles = (filenames: string[] = []) => {
-    for (const name of filenames) {
-        deleteFile(name);
-    }
-};
-
+import { deleteFile } from '../../utils/delete-single-file'
 
 export const findGalleryById = async (id: number) => {
     const { Gallery } = db;
@@ -45,17 +20,20 @@ export const findGalleryBySlug = async (slug: string) => {
 
 export const createGallery = async (req: any) => {
     const { Gallery } = db;
-    const { body, } = req;
+    const { body } = req;
 
-    const files = req.files as {
-        images?: Express.Multer.File[];
-    };
+    // Multer’s uploaded files
+    const files = req.files as { images?: Express.Multer.File[]; };
 
-    const images = files?.images || [];
+    // Folder created by multer (e.g. tenantA_1731424523123)
+    const imageFolder = req.imagefolder;
+
+    // 🖼️ Map to include folder + filename
+    const imagePaths = files?.images?.map((file) => `${imageFolder}/${file.filename}`) || [];
 
     const galleryData = {
         ...body,
-        images: images.map((file) => file.filename),
+        images: imagePaths,
     };
 
     const newGallery = await Gallery.create(galleryData);
@@ -86,69 +64,116 @@ export const findGalleries = async (page: number = 1, limit: number = 10) => {
 export const updateGallery = async (id: number, req: any) => {
     const { Gallery } = db;
     const { body } = req;
-    const { existingImages = [] } = req.body;
+    const files = req.files as { images?: Express.Multer.File[] } | undefined;
 
-    // 🧩 Parse existingImages if sent as JSON string
-    const parsedExistingImages = typeof existingImages === "string"
-        ? JSON.parse(existingImages)
-        : existingImages;
+    // 🔍 Fetch current gallery early so we can derive folder if needed
+    const gallery: any = await Gallery.findByPk(id);
+    if (!gallery) throw new Error("Gallery not found");
 
-    // 📦 Handle file uploads
-    const files = req.files as { images?: Express.Multer.File[] };
-    const uploadedImages = files?.images?.map((file) => file.filename) || [];
+    const oldImages: string[] = gallery.images || [];
 
-    // 🔍 Fetch existing gallery
-    const existing: any = await Gallery.findByPk(id);
-    if (!existing) throw new Error("Gallery not found");
+    // 1) pick folder name:
+    // prefer req.imagefolder (set by multer during an upload),
+    // else derive from first old image path (if exists)
+    const folderFromReq = req.imagefolder;
+    const folderFromOld = oldImages.length > 0 ? oldImages[0].split("/")[0] : undefined;
+    const imageFolder = folderFromReq || folderFromOld; // may be undefined
 
-    const oldImages: string[] = existing.images || [];
-
-    // 🧹 Determine which old images should be deleted
-    const toDelete = oldImages.filter((img) => !parsedExistingImages.includes(img));
-
-    // 🗑️ Delete only the removed images using your helper
-    if (toDelete.length > 0) {
-        console.log("🗑️ Deleting removed files:", toDelete);
-        deleteFiles(toDelete);
+    // 2) parse existingImages from body (supports JSON string or array)
+    let parsedExisting: string[] = [];
+    if (typeof body.existingImages === "string") {
+        try {
+            parsedExisting = JSON.parse(body.existingImages);
+        } catch (e) {
+            parsedExisting = [];
+        }
+    } else if (Array.isArray(body.existingImages)) {
+        parsedExisting = body.existingImages;
     }
 
-    // 🖼️ Combine kept + newly uploaded images
-    const finalImages = [...parsedExistingImages, ...uploadedImages];
+    // 3) normalize parsedExisting:
+    // - if already contains '/', keep as-is
+    // - if plain filename and we know imageFolder, prefix it
+    // - otherwise keep as plain filename (we'll compare by basename below)
+    const existingImages = parsedExisting.map((img: string) => {
+        if (!img) return img;
+        if (img.includes("/") || img.includes("\\")) return img;
+        if (imageFolder) return `${imageFolder}/${img}`;
+        return img; // no folder known — keep as-is for basename-based compare
+    });
 
-    // 🧠 Build update data
-    const updateData: any = {
+    // 4) prepare new images (if any were uploaded in this request)
+    const newImages =
+        files?.images?.map((f) => (imageFolder ? `${imageFolder}/${f.filename}` : f.filename)) || [];
+
+    // helper to get basename (filename only)
+    const basename = (p: string) => (typeof p === "string" ? p.split("/").pop() : p);
+
+    // 5) determine which old images to delete:
+    // compare by basename to be tolerant to whether frontend sent paths or just names
+    const existingBasenames = new Set(existingImages.map((e) => basename(e)));
+    const toDelete = oldImages.filter((old) => !existingBasenames.has(basename(old)));
+
+    // safety: if parsedExisting was empty and there were no newImages,
+    // you might want to avoid accidental mass-delete — optional safety guard:
+    // if (parsedExisting.length === 0 && newImages.length === 0) { /* skip deletion? */ }
+
+    // 6) delete files physically
+    for (const img of toDelete) {
+        try {
+            deleteFile(img);
+        } catch (err) {
+            console.error("Failed to delete image:", img, err);
+        }
+    }
+
+    // 7) combine kept + new (both are full paths if imageFolder known)
+    const finalImages = [...existingImages, ...newImages];
+
+    // 8) update DB
+    const updateData = {
         ...body,
         images: finalImages,
         updatedAt: new Date(),
     };
 
-    // 💾 Perform update in DB
-    const [affectedCount, updatedRows] = await Gallery.update(updateData, {
+    const [updatedCount, [updatedGallery]] = await Gallery.update(updateData, {
         where: { id },
         returning: true,
     });
 
-    if (affectedCount === 0) throw new Error("No changes made to gallery");
+    if (updatedCount === 0) throw new Error("No changes made to gallery");
 
-    return updatedRows[0];
+    console.log(`✅ Gallery updated (ID: ${id})`);
+    return updatedGallery;
 };
 
 export const deleteGallery = async (id: number) => {
     const { Gallery } = db;
 
+    // 🔍 1️⃣ Find gallery record
     const gallery: any = await Gallery.findByPk(id);
     if (!gallery) throw new Error("Gallery not found");
 
-    // 🧹 Delete all associated images (if exist)
-    if (gallery.images && Array.isArray(gallery.images)) {
-        console.log(`🧹 Deleting ${gallery.images.length} images...`);
-        deleteFiles(gallery.images);
+    // 🧹 2️⃣ Delete all associated image files
+    if (Array.isArray(gallery.images) && gallery.images.length > 0) {
+        console.log(`🧹 Deleting ${gallery.images.length} images for gallery ID ${id}...`);
+
+        for (const image of gallery.images) {
+            try {
+                deleteFile(image); // Automatically handles "uploads/" prefix internally
+            } catch (err) {
+                console.error(`⚠️ Failed to delete image ${image}:`, err);
+            }
+        }
+    } else {
+        console.log(`⚠️ No images found for gallery ID ${id}.`);
     }
 
-    // 🗑️ Delete DB record
+    // 🗑️ 3️⃣ Delete gallery record from DB
     await Gallery.destroy({ where: { id } });
-
     console.log(`✅ Deleted gallery ID: ${id}`);
+
     return true;
 };
 
@@ -165,17 +190,40 @@ export const updateStatus = async (id: number, req: any) => {
     return true;
 };
 
+// export const deleteGalleryImage = async (gallerySlug: string, filename: string) => {
+//     const { Gallery } = db;
+
+//     const gallery: any = await Gallery.findOne({ where: { slug: gallerySlug } });
+//     if (!gallery) throw new Error("Gallery not found");
+
+//     if (gallery.images && Array.isArray(gallery.images)) {
+//         gallery.images = gallery.images.filter((img: string) => img !== filename);
+//     }
+//     deleteFile(filename);
+//     await gallery.save();
+
+//     return true;
+// };
+
+
 export const deleteGalleryImage = async (gallerySlug: string, filename: string) => {
     const { Gallery } = db;
 
     const gallery: any = await Gallery.findOne({ where: { slug: gallerySlug } });
     if (!gallery) throw new Error("Gallery not found");
 
-    if (gallery.images && Array.isArray(gallery.images)) {
-        gallery.images = gallery.images.filter((img: string) => img !== filename);
+    if (!Array.isArray(gallery.images) || gallery.images.length === 0) {
+        throw new Error("No images found in this gallery.");
     }
-    deleteFile(filename);
-    await gallery.save();
 
+    const imageExists = gallery.images.includes(filename);
+    if (!imageExists) { throw new Error("Image not found in gallery."); }
+
+    gallery.images = gallery.images.filter((img: string) => img !== filename);
+
+    await gallery.save();
+    deleteFile(filename);
+
+    console.log(`🗑️ Deleted image "${filename}" from gallery "${gallerySlug}"`);
     return true;
 };

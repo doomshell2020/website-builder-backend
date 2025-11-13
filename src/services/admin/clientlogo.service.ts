@@ -1,20 +1,5 @@
 import db from '../../models/index';
-import fs from 'fs';
-import path from 'path';
-
-// 🧹 File Delete Helper
-const deleteFile = (filename?: string) => {
-  if (!filename) return;
-  const filePath = path.join(process.cwd(), "uploads", filename);
-  if (fs.existsSync(filePath)) {
-    try {
-      fs.unlinkSync(filePath);
-      console.log(`Deleted file: ${filePath}`);
-    } catch (err) {
-      console.error(`Failed to delete file ${filename}:`, err);
-    }
-  }
-};
+import { deleteFile } from '../../utils/delete-single-file'
 
 export const findClientLogoByIds = async (id: string) => {
   const { ClientLogo } = db;
@@ -39,10 +24,13 @@ export const findUrl = async (url: string) => {
 export const createClientLogo = async (req: any) => {
   const { ClientLogo } = db;
   const { body, file } = req;
+  const imageFolder = req.imagefolder;
+  const uploadedFile = file?.filename || null;
+  const imagePath = uploadedFile ? `${imageFolder}/${uploadedFile}` : null;
 
   const ClientLogoData = {
     ...body,
-    image: file?.filename || null,
+    image: imagePath,
   };
 
   return await ClientLogo.create(ClientLogoData);
@@ -73,17 +61,20 @@ export const findAllClientLogos = async (page: number = 1, limit: number = 10) =
 export const updateClientLogo = async (id: number, req: any) => {
   const { ClientLogo } = db;
   const { body, file } = req;
+
   const existing: any = await ClientLogo.findByPk(id);
-  if (!existing) {
-    throw new Error('Client Logo not found.');
-  }
+  if (!existing) { throw new Error('Client Logo not found.'); }
+  
   const updateData: any = {
     ...body,
     updatedAt: new Date(),
   };
 
   if (file?.filename) {
-    updateData.image = file.filename;
+    const imageFolder = req.imagefolder;
+    const uploadedFile = file?.filename || null;
+    const imagePath = uploadedFile ? `${imageFolder}/${uploadedFile}` : null;
+    updateData.image = imagePath;
     // Delete old image
     deleteFile(existing.image);
   }
@@ -99,10 +90,18 @@ export const updateClientLogo = async (id: number, req: any) => {
 export const deleteClientLogo = async (id: number) => {
   const { ClientLogo } = db;
   const clientlogo: any = await ClientLogo.findByPk(id);
-  if (!clientlogo) {
-    throw new Error('Client Logo not found');
+  if (!clientlogo) { throw new Error('Client Logo not found'); }
+
+  const imagePath = clientlogo.image;
+
+  if (imagePath) {
+    try {
+      deleteFile(imagePath);
+      console.log(`🗑 Deleted image for clientLogo ID ${id}: ${imagePath}`);
+    } catch (err) {
+      console.error(`⚠️ Failed to delete image for slider ID ${id}:`, err);
+    }
   }
-  deleteFile(clientlogo.image);
 
   await ClientLogo.destroy({ where: { id } });
   return true;

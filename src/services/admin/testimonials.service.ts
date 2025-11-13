@@ -1,23 +1,7 @@
 import db from '../../models/index';
-import fs from 'fs';
-import path from 'path';
-import cleanupUploads from '../../utils/cleanupImage';
+import { deleteFile } from '../../utils/delete-single-file'
 
-// 🧹 File Deletion Helper
-const deleteFile = (filename?: string) => {
-  if (!filename) return;
-  const filePath = path.join(process.cwd(), 'uploads', filename);
-  if (fs.existsSync(filePath)) {
-    try {
-      fs.unlinkSync(filePath);
-      console.log(`Deleted file: ${filename}`);
-    } catch (err) {
-      console.error(`Failed to delete file "${filename}":`, err);
-    }
-  }
-};
-
-// 🔍 Find Single Testimonial by Ids
+// Find Single Testimonial by Ids
 export const findTestimonialsByIds = async (id: string) => {
   const { Testimonials } = db;
   const testimonial = await Testimonials.findByPk(id);
@@ -25,30 +9,38 @@ export const findTestimonialsByIds = async (id: string) => {
   return testimonial;
 };
 
-// 🔍 Find Single Testimonial by Name
+// Find Single Testimonial by Name
 export const findName = async (name: string) => {
   const { Testimonials } = db;
   return await Testimonials.findOne({ where: { name } });
 };
 
-// ➕ Create Testimonial
+// Create Testimonial
 export const createTestimonials = async (req: any) => {
   const { Testimonials } = db;
   const { body, files } = req;
 
-  const image = files?.image?.[0]?.filename || null;
-  const companyLogo = files?.company_logo?.[0]?.filename || null;
+  const imageFolder = req.imagefolder; // 📁 e.g. tenantA_1731424523123
 
-  const newTestimonial = await Testimonials.create({
+  // 🧠 Safely build full relative paths for each file
+  const image = files?.image?.[0]?.filename
+    ? `${imageFolder}/${files.image[0].filename}`
+    : null;
+
+  const companyLogo = files?.company_logo?.[0]?.filename
+    ? `${imageFolder}/${files.company_logo[0].filename}`
+    : null;
+
+  const testimonialData = {
     ...body,
     image,
     company_logo: companyLogo,
-  });
+  };
 
-  return newTestimonial;
+  return await Testimonials.create(testimonialData);
 };
 
-// 📄 List Testimonials with Pagination
+// List Testimonials with Pagination
 export const findAllTestimonials = async (page: number = 1, limit: number = 10) => {
   const { Testimonials } = db;
   const pageNumber = Number.isInteger(page) && page > 0 ? page : 1;
@@ -70,63 +62,91 @@ export const findAllTestimonials = async (page: number = 1, limit: number = 10) 
   };
 };
 
-// ✏️ Update Testimonial
+// Update Testimonial
 export const updateTestimonials = async (id: number, req: any) => {
   const { Testimonials } = db;
   const { body } = req;
   const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
 
+  // 📦 Get existing record
   const existing: any = await Testimonials.findByPk(id);
-  if (!existing) {
-    await cleanupUploads(req);
-    throw new Error('Testimonial not found');
-  }
+  if (!existing) throw new Error("Testimonial not found.");
 
   const updateData: any = {
     ...body,
     updatedAt: new Date(),
   };
 
-  // Update images if new files are uploaded
+  // 📁 Get folder from multer (auto-created)
+  const imageFolder = req.imagefolder;
+
+  // 🖼️ If new image uploaded
   if (files?.image?.[0]) {
-    deleteFile(existing.image);
-    updateData.image = files.image[0].filename;
+    const newImagePath = `${imageFolder}/${files.image[0].filename}`;
+
+    // Delete old image (safe check)
+    if (existing.image) deleteFile(existing.image);
+
+    updateData.image = newImagePath;
   }
 
+  // 🏢 If new company logo uploaded
   if (files?.company_logo?.[0]) {
-    deleteFile(existing.company_logo);
-    updateData.company_logo = files.company_logo[0].filename;
+    const newLogoPath = `${imageFolder}/${files.company_logo[0].filename}`;
+
+    // Delete old logo (safe check)
+    if (existing.company_logo) deleteFile(existing.company_logo);
+
+    updateData.company_logo = newLogoPath;
   }
 
   try {
+    // 🔄 Update record
     const [affectedCount, updatedRows] = await Testimonials.update(updateData, {
       where: { id },
       returning: true,
     });
 
-    if (affectedCount === 0) throw new Error('No changes made to Testimonial');
+    if (affectedCount === 0) throw new Error("No changes made to Testimonial");
 
     return updatedRows?.[0] ?? (await Testimonials.findByPk(id));
   } catch (error) {
-    console.error('Error updating Testimonial:', error);
-    await cleanupUploads(req);
+    console.error("❌ Error updating Testimonial:", error);
     throw error;
   }
 };
 
-// 🗑 Delete Testimonial
+//  Delete Testimonial
 export const deleteTestimonials = async (id: number) => {
   const { Testimonials } = db;
+
+  // 1️⃣ Find existing testimonial
   const testimonial: any = await Testimonials.findByPk(id);
-  if (!testimonial) throw new Error('Testimonial not found');
+  if (!testimonial) {
+    throw new Error("Testimonial not found");
+  }
 
-  ['image', 'company_logo'].forEach((field) => deleteFile(testimonial[field]));
-
+  // 2️⃣ Delete record from DB
   await Testimonials.destroy({ where: { id } });
+
+  // 3️⃣ Delete associated uploaded files
+  try {
+    if (testimonial.image) {
+      deleteFile(testimonial.image);
+      console.log(`🗑 Deleted testimonial image: ${testimonial.image}`);
+    }
+
+    if (testimonial.company_logo) {
+      deleteFile(testimonial.company_logo);
+      console.log(`🗑 Deleted testimonial company logo: ${testimonial.company_logo}`);
+    }
+  } catch (error) {
+    console.error("⚠️ Error deleting testimonial files:", error);
+  }
   return true;
 };
 
-// ⚡ Update Status Only
+// Update Status Only
 export const updateTestimonialsStatus = async (id: string, req: any) => {
   const { Testimonials } = db;
   const { status } = req.body;

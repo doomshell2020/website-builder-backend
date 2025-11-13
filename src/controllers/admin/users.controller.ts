@@ -2,67 +2,76 @@ import { Request, Response } from "express";
 import * as UserService from "../../services/admin/users.service";
 import { successResponse } from "../../utils/responseUtils";
 import { apiErrors } from "../../utils/api-errors";
-import { deleteUploadedFilesFromReq } from "../../utils/delete-multi";
-import fs from "fs";
-import path from "path";
-
-// Helper to delete uploaded file
-const deleteUploadedFile = (filename?: string) => {
-  if (!filename) return;
-  const filePath = path.join(process.cwd(), "uploads", filename);
-  if (fs.existsSync(filePath)) {
-    try {
-      fs.unlinkSync(filePath);
-    } catch (err) {
-      console.error("Failed to delete uploaded file:", err);
-    }
-  }
-};
+import { deleteUploadedFilesFromReq } from "../../utils/delete-multi-files";
+import { deleteUploadFolder } from "../../utils/delete-folder";
 
 // ===== CREATE USER =====
-export const CreateUser = async (req: Request, res: Response) => {
+export const CreateUser = async (req: any, res: Response) => {
   try {
-    const { email, role, company_name } = req.body;
+    const { email, role, company_name, subdomain } = req.body;
+
+    // 🔍 1️⃣ Check if user already exists
     const existingUser: any = await UserService.findUserByEmail(email);
 
     if (existingUser) {
-      const hasFiles = req.file || (req.files && Object.keys(req.files).length > 0);
-      if (hasFiles) await deleteUploadedFilesFromReq(req);
+      // Clean up uploaded files/folder
+      if (req.file || (req.files && Object.keys(req.files).length > 0)) {
+        await deleteUploadedFilesFromReq(req);
+      }
+      if (req.imagefolder) deleteUploadFolder(req.imagefolder);
+
       throw new apiErrors.BadRequestError("A user with this email already exists.");
     }
-
+    // 🔍 2️⃣ Check if company already exists & subdomain
     const existingCompany: any = await UserService.findCompanyName(company_name);
 
     if (existingCompany) {
-      const hasFiles = req.file || (req.files && Object.keys(req.files).length > 0);
-      if (hasFiles) await deleteUploadedFilesFromReq(req);
+      if (req.file || (req.files && Object.keys(req.files).length > 0)) {
+        await deleteUploadedFilesFromReq(req);
+      }
+      if (req.imagefolder) deleteUploadFolder(req.imagefolder);
+
       throw new apiErrors.BadRequestError("A company with this name already exists.");
     }
 
-    const userDetails: any = await UserService.createUser(req);
-    let roleName = '';
-    switch (userDetails.role) {
-      case 2:
-        roleName = 'Admin';
-        break;
-      case 3:
-        roleName = 'Tenant';
-        break;
-      default:
-        roleName = 'User';
-        break;
+    const existingSubdomain: any = await UserService.findCompanySubdomain(subdomain);
+
+    if (existingSubdomain) {
+      if (req.file || (req.files && Object.keys(req.files).length > 0)) {
+        await deleteUploadedFilesFromReq(req);
+      }
+      if (req.imagefolder) deleteUploadFolder(req.imagefolder);
+
+      throw new apiErrors.BadRequestError("A company with this subdomain already exists.");
     }
-    const response = successResponse(`${roleName} have been created successfully`, userDetails);
+
+    // ✅ 3️⃣ Create new user
+    const userDetails: any = await UserService.createUser(req);
+
+    const response = successResponse(`User has been created successfully`, userDetails);
     return res.status(response.statusCode).json(response.body);
   } catch (error: any) {
+    // 🧹 Cleanup if any failure occurs
     if (req?.file || (req?.files && Object.keys(req.files).length > 0)) {
       deleteUploadedFilesFromReq(req);
     }
-    if (error.message == 'Validation error') {
-      return res.status(404).json({ status: false, message: "A user with this email already exists." });
+
+    if (req?.imagefolder) {
+      deleteUploadFolder(req.imagefolder);
     }
+
+    if (error.message === "Validation error") {
+      return res.status(404).json({
+        status: false,
+        message: "A user with this email already exists.",
+      });
+    }
+
     const status = error instanceof apiErrors.BadRequestError ? 400 : 500;
-    return res.status(status).json({ status: false, message: error.message || "Internal Server Error" });
+    return res.status(status).json({
+      status: false,
+      message: error.message || "Internal Server Error",
+    });
   }
 };
 
@@ -98,7 +107,7 @@ export const UpdateUser = async (req: Request, res: Response) => {
 
     if (!id) throw new apiErrors.BadRequestError("User ID is required.");
 
-    const existingCompany: any = await UserService.findCompanyName(company_name, id);
+    const existingCompany: any = await UserService.findCompanyNameOnUpdate(company_name, id);
 
     if (existingCompany) {
       const hasFiles = req.file || (req.files && Object.keys(req.files).length > 0);

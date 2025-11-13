@@ -1,20 +1,5 @@
 import db from '../../models/index';
-import fs from 'fs';
-import path from 'path';
-
-// 🧹 File Delete Helper
-const deleteFile = (filename?: string) => {
-  if (!filename) return;
-  const filePath = path.join(process.cwd(), "uploads", filename);
-  if (fs.existsSync(filePath)) {
-    try {
-      fs.unlinkSync(filePath);
-      console.log(`Deleted file: ${filePath}`);
-    } catch (err) {
-      console.error(`Failed to delete file ${filename}:`, err);
-    }
-  }
-};
+import { deleteFile } from '../../utils/delete-single-file'
 
 export const findSlider = async (id: string) => {
   const { Slider } = db;
@@ -43,9 +28,17 @@ export const createSlider = async (req: any) => {
   const { Slider } = db;
   const { body, file } = req;
 
+  const imageFolder = req.imagefolder;
+  const uploadedFile = file?.filename || null;
+  const imagePath = uploadedFile ? `${imageFolder}/${uploadedFile}` : null;
+
+  console.log("📁 Folder:", imageFolder);
+  console.log("🖼️ Uploaded File:", uploadedFile);
+  console.log("✅ Full Path:", imagePath);
+
   const SliderData = {
     ...body,
-    images: file?.filename || null,
+    images: imagePath,
   };
 
   return await Slider.create(SliderData);
@@ -76,20 +69,23 @@ export const updateSlider = async (id: number, req: any) => {
   const { Slider } = db;
   const { body, file } = req;
 
+
   const existing: any = await Slider.findByPk(id);
   if (!existing) throw new Error('Slider not found');
 
   const updateData: any = { ...body, updatedAt: new Date() };
 
   if (file?.filename) {
-    updateData.images = file.filename;
+    const imageFolder = req.imagefolder;
+    const uploadedFile = file?.filename || null;
+    const imagePath = uploadedFile ? `${imageFolder}/${uploadedFile}` : null;
+    updateData.images = imagePath;
     // Delete old image
     deleteFile(existing.images);
   }
 
   const [affectedCount, updatedRows] = await Slider.update(updateData, {
-    where: { id },
-    returning: true,
+    where: { id }, returning: true,
   });
 
   if (affectedCount === 0) throw new Error('No changes made to slider');
@@ -99,15 +95,22 @@ export const updateSlider = async (id: number, req: any) => {
 
 export const deleteSlider = async (id: number) => {
   const { Slider } = db;
+
   const slider: any = await Slider.findByPk(id);
-  if (!slider) throw new Error('Slider not found');
+  if (!slider) { throw new Error("Slider not found"); }
 
-  // Delete file safely
-  deleteFile(slider.images);
+  const imagePath = slider.images;
 
-  // Delete DB record
   await Slider.destroy({ where: { id } });
 
+  if (imagePath) {
+    try {
+      deleteFile(imagePath);
+      console.log(`🗑 Deleted image for slider ID ${id}: ${imagePath}`);
+    } catch (err) {
+      console.error(`⚠️ Failed to delete image for slider ID ${id}:`, err);
+    }
+  }
   return true;
 };
 

@@ -187,6 +187,7 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
     res.cookie("role", user.role, cookieOptions);
     res.cookie("schema", user.schema_name, cookieOptions);
     res.cookie("company_logo", user.company_logo, cookieOptions);
+    res.cookie("image_folder", user.imageFolder, cookieOptions);
 
     return res.status(200).json({
       status: true,
@@ -200,6 +201,7 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
         name: user.name,
         role: user.role,
         schema: user.schema_name,
+        image_folder: user.imageFolder,
         company_logo: user.company_logo,
         masterAccess: isMasterUsed,
       },

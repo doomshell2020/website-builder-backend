@@ -34,7 +34,7 @@ const generateFilename = (file: Express.Multer.File) => {
 };
 
 // ⚙️ Universal Upload Function (Smart) //
-export default function createUploader(
+export default function createUploaderForUsers(
   fields: string[] | string,
   mode: "single" | "multi" = "single",
   allowed: "image" | "image+pdf" | "csv+xlsx" | "all" = "image",
@@ -78,7 +78,8 @@ export default function createUploader(
   const storage = multer.diskStorage({
     destination: (req, file, cb) => {
       // 1️⃣ If folder already exists in body, reuse it
-      let folderName = req.headers['x-folder'] as string;
+      let folderName = req.body?.imageFolder;
+
 
       if (folderName && folderName.trim() !== "") {
         console.log(`🟢 Using existing folder: ${folderName}`);

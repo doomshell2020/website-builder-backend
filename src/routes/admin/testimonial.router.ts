@@ -8,12 +8,6 @@ const router: Router = express.Router();
 
 // Add Testimonial
 router.post('/add', createUploader(['image', 'company_logo'], 'multi', 'image', 5),
-  (req: any, res, next) => {
-    if (!req.files || (!req.files['image'] && !req.files['company_logo'])) {
-      console.warn('⚠️ Multer did not receive image or company_logo file!');
-    }
-    next();
-  },
   validateWithCleanup(schema.TestimonialJoiSchema) as any,
   ErrorHandler(TestimonialController.CreateTestimonials as any)
 );

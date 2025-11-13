@@ -3,7 +3,7 @@ import * as UserService from '../../services/admin/profile.service';
 import { successResponse } from '../../utils/responseUtils';
 import { apiErrors } from '../../utils/api-errors';
 import * as UserUpdateService from "../../services/admin/users.service";
-import { deleteUploadedFilesFromReq } from "../../utils/delete-multi";
+import { deleteUploadedFilesFromReq } from "../../utils/delete-multi-files";
 
 export const FindUser = async (req: Request, res: Response) => {
   try {

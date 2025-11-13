@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import * as TestimonialsServices from '../../services/admin/testimonials.service';
 import { successResponse } from '../../utils/responseUtils';
 import { apiErrors } from '../../utils/api-errors';
-import { deleteUploadedFilesFromReq } from "../../utils/delete-multi";
+import { deleteUploadedFilesFromReq } from "../../utils/delete-multi-files";
 
 // Get by Id
 export const FindTestimonialsById = async (req: Request, res: Response) => {

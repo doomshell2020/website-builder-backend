@@ -8,12 +8,6 @@ const router: Router = express.Router();
 
 // Add new client-logo
 router.post('/add', createUploader('image', 'single', 'image', 2),
-  (req, res, next) => {
-    if (!req.file) {
-      console.log('⚠️ Multer did not receive any file!');
-    }
-    next();
-  },
   validateWithCleanup(schema.ClientlogoJoiSchema) as any,
   ErrorHandler(ClientLogoController.CreateClientLogo as any)
 );

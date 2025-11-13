@@ -3,7 +3,6 @@ import * as GalleryController from '../../controllers/admin/gallery.controller';
 import ErrorHandler from '../../middleware/error.middleware';
 import * as schema from '../../validations/admin/gallery.validation';
 import validateWithCleanup from '../../utils/validatorWithCleanup.util';
-import validate from "../../utils/validator.util";
 import createUploader from '../../middleware/uploadMiddleware';
 const router: Router = express.Router();
 

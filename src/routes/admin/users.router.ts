@@ -4,13 +4,13 @@ import * as ProfileController from '../../controllers/admin/profile.controller';
 import ErrorHandler from "../../middleware/error.middleware";
 import * as schema from '../../validations/admin/users.validation';
 import validate from "../../utils/validatorWithCleanup.util";
-import createUploader from "../../middleware/uploadMiddleware";
+import createUploaderOnlyUsers from "../../middleware/uploadMiddlewareForUsers";
 
 const router: Router = express.Router();
 
 // ===== CREATE USER =====
-router.post("/add", createUploader('company_logo', 'single', 'image', 5), validate(schema.cmsUserSchema) as any,
-  ErrorHandler(UserController.CreateUser as any));
+router.post("/add", createUploaderOnlyUsers('company_logo', 'single', 'image', 5),
+  validate(schema.cmsUserSchema) as any, ErrorHandler(UserController.CreateUser as any));
 
 // ===== GET USERS =====
 router.get("/view-all", ErrorHandler(UserController.UsersFindAll as any));
@@ -19,12 +19,12 @@ router.get("/view/:id", ErrorHandler(UserController.FindUser as any));
 // router.get("/view-company/:name", ErrorHandler(UserController.FindProject as any));
 
 // ===== UPDATE USERS =====
-router.put("/update/:id", createUploader('company_logo', 'single', 'image', 5), validate(schema.editCmsUserSchema) as any,
-  ErrorHandler(UserController.UpdateUser as any));
+router.put("/update/:id", createUploaderOnlyUsers('company_logo', 'single', 'image', 5),
+  validate(schema.editCmsUserSchema) as any, ErrorHandler(UserController.UpdateUser as any));
 
 // ===== UPDATE USERS =====
-router.put("/self/:id", createUploader('company_logo', 'single', 'image', 5), validate(schema.editCmsUserSchema) as any,
-  ErrorHandler(ProfileController.UpdateUser as any));
+router.put("/self/:id", createUploaderOnlyUsers('company_logo', 'single', 'image', 5),
+  validate(schema.editCmsUserSchema) as any, ErrorHandler(ProfileController.UpdateUser as any));
 
 // ===== DELETE USER =====
 router.delete("/delete/:id", ErrorHandler(UserController.DeleteUser as any));

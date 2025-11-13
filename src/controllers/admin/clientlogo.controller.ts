@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import * as ClientLogoServices from '../../services/admin/clientlogo.service';
 import { successResponse } from '../../utils/responseUtils';
 import { apiErrors } from '../../utils/api-errors';
-import { deleteUploadedFilesFromReq } from "../../utils/delete-multi";
+import { deleteUploadedFilesFromReq } from "../../utils/delete-multi-files";
 
 // Get by Id
 export const FindClientLogoById = async (req: Request, res: Response) => {

@@ -65,6 +65,7 @@ export default (sequelize: Sequelize) => {
       instaurl: { type: DataTypes.STRING(250), allowNull: true },
       country: { type: DataTypes.STRING(100), allowNull: true },
       gstin: { type: DataTypes.STRING(100), allowNull: true },
+      imageFolder: { type: DataTypes.STRING(255), allowNull: true },
       address1: { type: DataTypes.STRING(255), allowNull: true },
       address2: { type: DataTypes.STRING(255), allowNull: true },
       image: { type: DataTypes.TEXT, allowNull: true },

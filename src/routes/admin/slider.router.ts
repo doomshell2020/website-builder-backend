@@ -8,11 +8,6 @@ const router: Router = express.Router();
 
 // Add new Slider
 router.post('/add', createUploader('images', 'single', 'image', 2),
-  (req, res, next) => {
-    if (!req.file) {
-      console.log('⚠️ Multer did not receive any file!');
-    } next();
-  },
   validateWithCleanup(schema.SliderJoiSchema) as any,
   ErrorHandler(SliderController.CreateSlider as any)
 );

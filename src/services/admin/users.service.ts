@@ -3,8 +3,8 @@ import db from "../../models/index";
 import bcryptUtil from "../../utils/bcrypt.util";
 import { sendEmail } from '../../utils/email';
 import { UpdateStatus } from '../../utils/email-templates';
-import fs from "fs";
-import path from "path";
+import { deleteUploadFolder } from "../../utils/delete-folder";
+import { deleteFile } from '../../utils/delete-single-file'
 import { createSchema, createAndCloneSchema, deleteSchema, renameSchema } from "./schema.service";
 const { User, Role, Theme } = db;
 
@@ -19,13 +19,6 @@ const parsePagination = ({ page, limit }: PaginationParams) => {
   const limitNumber = limit && !isNaN(Number(limit)) ? Number(limit) : 10;
   const offset = (pageNumber - 1) * limitNumber;
   return { pageNumber, limitNumber, offset };
-};
-
-// Helper to delete file if exists
-const deleteFile = (filename?: string) => {
-  if (!filename) return;
-  const filePath = path.join(process.cwd(), "uploads", filename);
-  if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
 };
 
 // ====== USER SERVICES ======
@@ -78,16 +71,25 @@ export const fetchAllAdmin = async (params: PaginationParams) => {
 export const createUser = async (req: any) => {
   const { body, file } = req;
 
-  const companyLogo = file?.filename || null;
-  console.log("companyLogo: ", companyLogo);
+  const imageFolder = req.imagefolder; // e.g. tenantA_1731424523123
+  const uploadedFile = file?.filename || null; // e.g. uuid_timestamp.png
+
+  // Build file path (optional, for easy access)
+  const companyLogoPath = uploadedFile ? `${imageFolder}/${uploadedFile}` : null;
+
+  // console.log("📁 Folder:", imageFolder);
+  // console.log("🖼️ Uploaded File:", uploadedFile);
+  // console.log("✅ Full Path:", companyLogoPath);
+
   const hashedPassword = await bcryptUtil.createHash(body.password);
 
   const newUser = await User.create({
     ...body,
-    status: 'N',
-    approval: 'N',
     password: hashedPassword,
-    company_logo: companyLogo,
+    status: "N",
+    approval: "N",
+    imageFolder: imageFolder, // folder name
+    company_logo: companyLogoPath, // full path 
   });
 
   if (newUser) {
@@ -212,30 +214,33 @@ export const createUser = async (req: any) => {
 };
 
 export const findUserByEmail = async (email: string) => {
-  await User.findOne({
-    where: { email }, include: [
-      {
-        model: Role,
-        as: 'roleData',
-        attributes: ['id', 'name', 'description'],
-      },
-      {
-        model: Theme,
-        as: 'Theme', // ✅ Must match association alias
-        attributes: ['id', 'name', 'description'],
-      },
-    ],
-  });
-}
+  return await User.findOne({ where: { email } });
+};
 
-export const findCompanyName = async (company_name: string, id?: number) => {
-  const company = await User.findOne({
-    where: {
-      company_name,
-      ...(id && { id: { [Op.ne]: id } }), // exclude self if provided
-    },
-  });
+export const findCompanyName = async (company_name: string) => {
+  const company = await User.findOne({ where: { company_name } });
+  return company;
+};
 
+export const findCompanySubdomain = async (subdomain: string) => {
+
+  const company = await User.findOne({ where: { subdomain } });
+  return company;
+};
+
+export const findCompanyNameOnUpdate = async (
+  company_name: string,
+  id?: number
+) => {
+  const where: any = {
+    company_name, // direct equality (case-sensitive)
+  };
+
+  if (id) {
+    where.id = { [Op.ne]: id }; // exclude current record
+  }
+
+  const company = await User.findOne({ where });
   return company;
 };
 
@@ -258,53 +263,58 @@ export const findUserById = async (id: string | number) => {
 
 export const updateUser = async (id: number, req: any) => {
   const { body, file } = req;
-  const { oldSchemaName, newSchemaName } = req.body;
 
-  const newCompanyLogo = file?.filename || null;
+  // 🖼️ Handle new upload (if any)
+  const imageFolder = req.imagefolder; // e.g. tenantA_1731424523123
+  const uploadedFile = file?.filename || null; // e.g. uuid_timestamp.png
+  const companyLogoPath = uploadedFile ? `${imageFolder}/${uploadedFile}` : null;
 
-  const existing: any = await User.findOne({
+  // 🧠 1️⃣ Validate duplicate email
+  const existing = await User.findOne({
     where: { email: body.email, id: { [Op.ne]: id } },
   });
-
   if (existing) {
-    if (newCompanyLogo) deleteFile(newCompanyLogo);
-    throw new Error("This email is already used by another user.");
+    if (companyLogoPath) deleteFile(companyLogoPath);
+    throw new Error("A user with this email already exists.");
   }
 
-  // new add to approvals
-  if (existing?.approval == 'N') {
-    if (newCompanyLogo) deleteFile(newCompanyLogo);
-    throw new Error("This your is not approved to update.");
-  }
-
+  // 🧠 2️⃣ Get current user
   const currentUser: any = await User.findByPk(id);
   if (!currentUser) {
-    if (newCompanyLogo) deleteFile(newCompanyLogo);
+    if (companyLogoPath) deleteFile(companyLogoPath);
     throw new Error("User not found.");
   }
 
+  // // 🧠 3️⃣ Approval check
+  // if (currentUser.approval === "N") {
+  //   if (companyLogoPath) deleteFile(companyLogoPath);
+  //   throw new Error("This user is not approved for update.");
+  // }
+
+  // 🧩 4️⃣ Prepare updated data
   const updateData: any = {
     ...body,
     updatedAt: new Date(),
   };
 
-  if (newCompanyLogo) {
-    updateData.company_logo = newCompanyLogo;
-    if (currentUser.company_logo) deleteFile(currentUser.company_logo);
-  }
+  // 🧠 5️⃣ Password hashing (if provided)
   if (body.password) {
     updateData.password = await bcryptUtil.createHash(body.password);
   }
 
-  const updatedData = await User.update(updateData, { where: { id } });
-  // if (updatedData) {
-  //   try {
-  //     await renameSchema(oldSchemaName, newSchemaName);
-  //   } catch (err: any) {
-  //     console.error(`❌ Failed to update Schema name: `, err);
-  //     throw new Error(`Failed to update user's schema name: ${err.message}`);
-  //   }
-  // }
+  // 🖼️ 6️⃣ Handle new logo file
+  if (companyLogoPath) {
+    // delete old logo if exists
+    if (currentUser.company_logo) {
+      await deleteFile(currentUser.company_logo);
+    }
+    updateData.company_logo = companyLogoPath;
+  }
+
+  // 🧠 7️⃣ Update record
+  await User.update(updateData, { where: { id } });
+
+  // 🧠 8️⃣ Return updated user
   return await User.findByPk(id);
 };
 
@@ -334,16 +344,15 @@ export const deleteUserById = async (id: number): Promise<boolean> => {
       }
     }
   }
-
-  // Delete uploaded files
-  if (userData.company_logo) deleteFile(userData.company_logo);
-
   // Delete user record
   const deletedCount = await User.destroy({ where: { id } });
   if (deletedCount === 0) {
     console.warn(`⚠️ Failed to delete user with ID ${id} — record not found`);
     return false;
   }
+
+  // Delete uploaded folder
+  if (userData?.imageFolder) await deleteUploadFolder(userData.imageFolder);
 
   return true;
 };
@@ -428,7 +437,6 @@ export const approveUser = async (id: string, req: any) => {
     };
   }
 };
-
 
 export const saveDomain = async (id: number, req: any) => {
   const { www_domain } = req.body;
