@@ -3,7 +3,7 @@ import * as ThemeService from "../../services/admin/theme.service";
 import { successResponse } from "../../utils/responseUtils";
 import { apiErrors } from '../../utils/api-errors';
 
-// Create a new Theme (Theme)
+// Create a new Theme
 export const CreateTheme = async (req: Request, res: Response) => {
     try {
         const ThemeDetail = await ThemeService.createTheme(req);
@@ -35,7 +35,7 @@ export const FindAllThemes = async (req: Request, res: Response) => {
     }
 };
 
-// find all webtype for dropdown
+// find all theme for dropdown
 export const FindTheme = async (req: Request, res: Response) => {
     try {
         const page = parseInt(req.query.page as string) || 1;
