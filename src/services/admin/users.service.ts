@@ -371,7 +371,7 @@ export const searchUser = async (page = 1, limit = 10, searchTerm?: string, from
   if (searchTerm?.trim()) {
     const term = `%${searchTerm.trim()}%`;
     whereClause[Op.or] = [
-      { name: { [Op.iLike]: term } }, // PostgreSQL only
+      { company_name: { [Op.iLike]: term } }, // PostgreSQL only
       { email: { [Op.iLike]: term } },
     ];
   }
