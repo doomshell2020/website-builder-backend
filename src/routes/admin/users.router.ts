@@ -32,7 +32,7 @@ router.delete("/delete/:id", ErrorHandler(UserController.DeleteUser as any));
 // ===== UPDATE USER STATUS =====
 router.patch("/status/:id", ErrorHandler(UserController.UpdateStatusUser as any));
 
-// ===== DELETE USER =====
+// ===== SEARCH USER =====
 router.get('/search', ErrorHandler(UserController.SearchUser as any));
 
 // ===== APPROVE USER FOR USE DB =====

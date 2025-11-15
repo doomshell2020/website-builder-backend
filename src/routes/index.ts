@@ -21,6 +21,7 @@ import EnquiryRouter from './admin/enquiry.router';
 import FaqRouter from './admin/faq.router';
 import ThemeRouter from './admin/theme.router';
 import PlanRouter from './admin/plan.router';
+import SubscriptionRouter from './admin/subscription.router';
 
 // Create a new Router instance
 const router: Router = express.Router();
@@ -29,6 +30,7 @@ router.use('/users', authMiddleware as any, authorizeRole(['1']) as any, UsersRo
 router.use('/schema', authMiddleware as any, authorizeRole(['1']) as any, SchemaRouter as any);
 router.use('/themes', authMiddleware as any, authorizeRole(['1']) as any, ThemeRouter as any);
 router.use('/plans', authMiddleware as any, authorizeRole(['1']) as any, PlanRouter as any);
+router.use('/subscription', authMiddleware as any, authorizeRole(['1']) as any, SubscriptionRouter as any);
 
 router.use('/static', setSchema as any, StaticRouter as any);
 router.use('/slider', setSchema as any, SliderRouter as any);

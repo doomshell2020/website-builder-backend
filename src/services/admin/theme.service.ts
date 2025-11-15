@@ -7,7 +7,7 @@ export const findTheme = async (page: number, limit: number) => {
     try {
         const { count, rows } = await Theme.findAndCountAll({
             where: { status: 'Y' },
-            order: [["createdAt", "ASC"]],
+            order: [["createdAt", "DESC"]],
             include: [
                 {
                     model: User,

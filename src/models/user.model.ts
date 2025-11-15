@@ -1,33 +1,5 @@
 import { DataTypes, Model, Sequelize } from "sequelize";
 
-interface CmsUserAttributes {
-  id: number;
-  name: string;
-  email: string;
-  password: string;
-  mobile_no: string;
-  office_no?: string | null;
-  fax_no?: string | null;
-  company_name: string;
-  schema_name: string;
-  subdomain: string;
-  role: number;
-  fburl?: string | null;
-  xurl?: string | null;
-  linkedinurl?: string | null;
-  yturl?: string | null;
-  instaurl?: string | null;
-  country?: string | null;
-  gstin?: string | null;
-  address1?: string | null;
-  address2?: string | null;
-  image?: string | null;
-  status?: "Y" | "N";
-  deleted?: "Y" | "N";
-  createdAt?: Date;
-  updatedAt?: Date;
-}
-
 export default (sequelize: Sequelize) => {
   class User extends Model {
     static associate(db: any) {
@@ -39,6 +11,11 @@ export default (sequelize: Sequelize) => {
       User.belongsTo(db.Theme, {
         foreignKey: 'website_type',
         as: 'Theme',
+      });
+
+      User.hasMany(db.Subscription, {
+        foreignKey: 'c_id',
+        as: 'subscriptionData',
       });
     }
   }

@@ -6,7 +6,7 @@ import { UpdateStatus } from '../../utils/email-templates';
 import { deleteUploadFolder } from "../../utils/delete-folder";
 import { deleteFile } from '../../utils/delete-single-file'
 import { createSchema, createAndCloneSchema, deleteSchema, renameSchema } from "./schema.service";
-const { User, Role, Theme } = db;
+const { User, Role, Theme, Subscription } = db;
 
 type PaginationParams = {
   page?: number | string;
@@ -40,6 +40,12 @@ export const findAllUsers = async (params: PaginationParams) => {
         as: 'Theme', // ✅ Must match association alias
         attributes: ['id', 'name', 'description'],
       },
+      {
+        model: Subscription,
+        as: "subscriptionData",
+        limit: 1,
+        order: [["createdAt", "DESC"]],
+      }
     ],
   });
   return {
@@ -57,7 +63,7 @@ export const fetchAllAdmin = async (params: PaginationParams) => {
     offset,
     limit: limitNumber,
     where: { role: 1, status: "Y" },
-    order: [["createdAt", "ASC"]],
+    order: [["createdAt", "DESC"]],
   });
   return {
     data: rows,
@@ -92,124 +98,6 @@ export const createUser = async (req: any) => {
     company_logo: companyLogoPath, // full path 
   });
 
-  if (newUser) {
-    const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Welcome to Doomshell</title>
-</head>
-
-<body style="margin:0; padding:0; background-color:#f3f6fa; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="padding:40px 0;">
-    <tr>
-      <td align="center">
-
-        <!-- Main Container -->
-        <table width="640" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff"
-          style="border-radius:12px; overflow:hidden; box-shadow:0 4px 18px rgba(0,0,0,0.06);">
-
-          <!-- Header -->
-          <tr>
-            <td style="background:linear-gradient(135deg, #1b4d7a, #3085c3); padding:24px 36px;">
-              <table width="100%">
-                <tr>
-                  <td align="left">
-                    <img src="{LOGO_URL}" alt="Company Logo" style="height:58px; display:block;" />
-                  </td>
-                  <td align="right" style="color:#e8f4fb; font-weight:600; font-size:18px;">
-                    Doomshell Software Pvt. Ltd.
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-
-          <!-- Content -->
-          <tr>
-            <td style="padding:48px 40px 32px 40px; color:#1c1c1c; font-size:16px; line-height:1.7;">
-              <p style="margin:0 0 10px; font-size:22px; font-weight:700; color:#1b4d7a;">
-                Welcome, {Name}! 🎉
-              </p>
-              <p style="margin:0 0 16px;">
-                We’re thrilled to have you as part of the <strong>Doomshell</strong> family! Your account has been successfully created — and your dashboard is ready to explore.
-              </p>
-
-              <p style="margin:0 0 18px;">Here are your login details:</p>
-
-              <table cellpadding="0" cellspacing="0" border="0" style="width:100%; background:#f7fafc; border-radius:8px; margin:20px 0;">
-                <tr>
-                  <td style="padding:12px 16px; font-weight:600; width:140px; color:#1b4d7a;">Username:</td>
-                  <td style="padding:12px 16px; color:#333;">{username}</td>
-                </tr>
-                <tr>
-                  <td style="padding:12px 16px; font-weight:600; color:#1b4d7a;">Password:</td>
-                  <td style="padding:12px 16px; color:#333;">{password}</td>
-                </tr>
-              </table>
-
-              <p style="margin:0 0 28px;">
-                Access your personalized dashboard using the button below and begin managing your digital experience with ease.
-              </p>
-
-              <div style="text-align:center; margin:40px 0;">
-                <a href="{LOGIN_URL}"
-                  style="background-color:#1b4d7a; color:#ffffff; padding:14px 36px; text-decoration:none; font-weight:700; border-radius:8px; display:inline-block;">
-                  Open My Dashboard
-                </a>
-              </div>
-
-              <p style="margin:0 0 16px;">Need help? Our support team is just a click away.</p>
-              <p style="margin:0; color:#666;">
-                Welcome again to Doomshell — delivering smart IT solutions and powerful dashboards to drive your business forward.
-              </p>
-            </td>
-          </tr>
-
-          <!-- Footer -->
-          <tr>
-            <td style="background-color:#f1f4f7; padding:20px; text-align:center; color:#555; font-size:13px;">
-              &copy; {DATE} Doomshell Software Pvt. Ltd. All rights reserved.<br />
-              <a href="{SITE_URL2}" style="color:#1b4d7a; text-decoration:none; font-weight:500;">Visit Website</a> |
-              <a href="{LOGIN_URL}" style="color:#1b4d7a; text-decoration:none; font-weight:500;">Login</a>
-            </td>
-          </tr>
-
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`
-      .replace('{Name}', body.name)
-      .replace('{username}', body.email)
-      .replace('{password}', body.password)
-      .replace('{LOGIN_URL}', `https://doomshell.com/admin`)
-      .replace('{SITE_URL2}', `https://doomshell.com`)
-      .replace('{DATE}', `${new Date().getFullYear()}`)
-      .replace(
-        '{LOGO_URL}',
-        'https://media.licdn.com/dms/image/v2/D560BAQHvMq7-Q3ebQA/company-logo_200_200/company-logo_200_200/0/1704523933480/doomshell_software_pvt_ltd_logo?e=2147483647&v=beta&t=P-uYX09AKWYJHHP2wI1rX8xUISPOZJkYJXXCAlXHJ5c'
-      );
-
-    const emailPayload = UpdateStatus({
-      toEmail: newUser.dataValues.email,
-      subject: '🎉 Welcome to Doomshell — Your Account Details Inside',
-      html,
-      Name: newUser.dataValues.name,
-      username: body.email,
-      password: body.password,
-    });
-
-    try {
-      await sendEmail(emailPayload);
-      console.log('Registration email sent successfully');
-    } catch (err) {
-      console.error('Failed to send email:', err);
-    }
-  }
   return newUser;
 };
 
@@ -257,6 +145,12 @@ export const findUserById = async (id: string | number) => {
         as: 'Theme', // ✅ Must match association alias
         attributes: ['id', 'name', 'description'],
       },
+      {
+        model: Subscription,
+        as: "subscriptionData",
+        limit: 1, // get latest
+        order: [["created", "DESC"]],
+      }
     ],
   });
 };
@@ -407,6 +301,12 @@ export const searchUser = async (page = 1, limit = 10, searchTerm?: string, from
         as: 'Theme', // ✅ Must match association alias
         attributes: ['id', 'name', 'description'],
       },
+      {
+        model: Subscription,
+        as: "subscriptionData",
+        limit: 1, // get latest
+        order: [["created", "DESC"]],
+      }
     ],
   });
 

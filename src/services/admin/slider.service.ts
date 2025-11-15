@@ -11,7 +11,7 @@ export const findSlider = async (id: string) => {
 export const findTitle = async (title: string) => {
   const { Slider } = db;
   try {
-    const sliderData = await Slider.findAll({ where: { title: title, status: 'Y' }, order: [['createdAt', 'ASC']], });
+    const sliderData = await Slider.findAll({ where: { title: title, status: 'Y' }, order: [['createdAt', 'DESC']], });
     return sliderData;
   } catch (error) {
     throw error;
