@@ -567,4 +567,3 @@ export const searchSubscriptionBilling = async (page = 1, limit = 10, companyId?
   .replaceAll('{DISCOUNT}', discount)
   .replaceAll('{PAY_URL}', payUrl);
  */}
- 

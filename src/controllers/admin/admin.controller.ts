@@ -3,6 +3,7 @@ import * as AuthService from "../../services/admin/admin.service";
 import jwtConfig from "../../../config/jwt.config";
 import bcryptUtil from "../../utils/bcrypt.util";
 import { createToken, verifyToken } from "../../utils/jwt.util";
+import { convertToIST } from '../../middleware/date';
 
 // ===== REGISTER ===== //
 export const register = async (req: Request, res: Response): Promise<Response> => {
@@ -167,6 +168,19 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
 
     // 🧩 Subscribers Approved Only
     if (user?.role != "1" && user?.subscriptionData?.[0]?.status !== 'Y') {
+      return res.status(401).json({
+        status: false,
+        message: "Subscription expired. Please renew your plan.",
+      });
+    }
+
+    const nowIST = convertToIST(new Date());
+    const expiryIST = convertToIST(user?.subscriptionData?.[0]?.expiry_date);
+
+    console.log("NOW: ", nowIST);
+    console.log("EXIST: ", expiryIST);
+
+    if (user?.role !== "1" && expiryIST.isBefore(nowIST)) {
       return res.status(401).json({
         status: false,
         message: "Subscription expired. Please renew your plan.",
