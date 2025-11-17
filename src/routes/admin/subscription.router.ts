@@ -14,6 +14,7 @@ router.patch('/status/:id', ErrorHandler(SubscriptionController.UpdateStatusSubs
 // router.put('/update/:id', validate(schema.updateSubscriptionJoi) as any, ErrorHandler(SubscriptionController.UpdateSubscription as any));
 router.delete('/delete/:id', ErrorHandler(SubscriptionController.DeleteSubscription as any));
 router.get('/search', ErrorHandler(SubscriptionController.SearchSubscription as any));
+// router.get('/send/email', ErrorHandler(SubscriptionController.SearchSubscription as any));
 
 router.all('*', (req, res) => { res.status(404).json({ status: false, message: 'Path not found..!' }); });
 

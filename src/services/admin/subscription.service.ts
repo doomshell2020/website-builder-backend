@@ -6,360 +6,538 @@ import { UpdateStatus } from '../../utils/email-templates';
 const { Subscription, User, Plan } = db;
 
 export const findSubscriptionById = async (id: string) => {
-    try {
-        const subscriptionData = await Subscription.findOne({
-            where: { id },
-            include: [
-                {
-                    model: User,
-                    as: "Customer",
-                    attributes: ['id', 'name', 'email', 'mobile_no', 'company_name'],
-                },
-                {
-                    model: Plan,
-                    as: "Plan",
-                }
-            ]
-        });
-        if (!subscriptionData) {
-            throw new apiErrors.BadRequestError("Subscription not exists.");
+  try {
+    const subscriptionData = await Subscription.findOne({
+      where: { id },
+      include: [
+        {
+          model: User,
+          as: "Customer",
+          attributes: ['id', 'name', 'email', 'mobile_no', 'company_name'],
+        },
+        {
+          model: Plan,
+          as: "Plan",
         }
-        return subscriptionData;
-    } catch (error) {
-        throw error;
+      ]
+    });
+    if (!subscriptionData) {
+      throw new apiErrors.BadRequestError("Subscription not exists.");
     }
+    return subscriptionData;
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const findSubscription = async (page: number, limit: number) => {
-    try {
-        const subscriptionData = await Subscription.findAndCountAll({
-            where: { status: 'Y' }, order: [["createdAt", "DESC"]],
-        });
-        return subscriptionData;
-    } catch (error) {
-        console.error("Error fetching Subscription:", error);
-        throw error;
-    }
+  try {
+    const subscriptionData = await Subscription.findAndCountAll({
+      where: { status: 'Y' }, order: [["createdAt", "DESC"]],
+    });
+    return subscriptionData;
+  } catch (error) {
+    console.error("Error fetching Subscription:", error);
+    throw error;
+  }
 };
 
 export const createSubscription = async (req: any) => {
-    try {
-        const { email } = req?.body;
-        const subscriptionCreated: any = await Subscription.create(req.body);
-//         if (subscriptionCreated) {
-//             const html = `<!doctype html>
-// <html lang="en">
-// <head>
-//   <meta charset="utf-8">
-//   <meta name="viewport" content="width=device-width">
-//   <title>Payment Link</title>
-//   <style>
-//     /* Basic responsive rules (kept minimal for email client compatibility) */
-//     @media only screen and (max-width:620px) {
-//       .container { width: 100% !important; padding: 16px !important; }
-//       .card { padding: 18px !important; }
-//       .two-col td { display:block; width:100% !important; box-sizing:border-box; }
-//       .logo img { height:44px !important; }
-//       .amount { font-size:22px !important; }
-//       .btn { padding:12px 18px !important; font-size:15px !important; }
-//     }
-//   </style>
-// </head>
-// <body style="margin:0; padding:0; background-color:#f1f6f9; font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif; -webkit-font-smoothing:antialiased;">
+  try {
+    const {
+      plan_id, c_id, created, expiry_date, status, payment_id,
+      order_id, signature_razorpay, totaluser, plantotalprice,
+      taxprice, discount, payment_detail,
+      isdrop, dropdate, createdAt, payment_date, razorpay_order_id,
+      cgst, sgst, igst, per_user_rate, email, } = req.body;
 
-//   <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
-//     <tr>
-//       <td align="center" style="padding:28px 12px;">
-//         <!-- Outer container -->
-//         <table class="container" width="640" cellpadding="0" cellspacing="0" role="presentation" style="width:640px; max-width:100%; background-color:#ffffff; border-radius:6px; box-shadow:0 6px 20px rgba(11,38,64,0.06); overflow:hidden; border:4px solid #e94b4b;">
-          
-//           <!-- Header strip (small top accent) -->
-//           <tr>
-//             <td style="background:linear-gradient(90deg,#e94b4b 0%, #d83c3c 50%, #1b78a6 51%, #0f6aa0 100%); height:8px; line-height:8px;">&nbsp;</td>
-//           </tr>
+    const planTotal = Number(plantotalprice) || 0;
+    const discountAmount = Number(discount) || 0;
+    const taxAmount = Number(taxprice) || 0;
+    const orderTotal: any = planTotal - discountAmount + taxAmount;
 
-//           <!-- Logo / Top -->
-//           <tr>
-//             <td style="padding:22px 28px 8px 28px; text-align:center;" class="logo">
-//               <!-- Use your hosted logo URL (fallback to plain text if image blocked) -->
-//               <img src="https://www.doomshell.com/images/doomshell-logo.webp" alt="Doomshell" style="height:62px; display:block; margin:0 auto 6px auto;">
-//               <div style="font-size:12px; color:#1b78a6; font-weight:600; margin-top:2px;">
-//                 Payment Link • Order #{ORDER_ID}
-//               </div>
-//             </td>
-//           </tr>
+    const subscriptionCreated: any = await Subscription.create(req.body);
+    if (subscriptionCreated) {
+      const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-//           <!-- Card content -->
-//           <tr>
-//             <td class="card" style="padding:26px 36px 32px 36px; color:#16313f;">
-              
-//               <!-- Title -->
-//               <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
-//                 <tr>
-//                   <td style="text-align:center;">
-//                     <div style="font-size:20px; font-weight:700; color:#e94b4b;">Order Detail</div>
-//                     <div style="margin-top:8px; font-size:28px; font-weight:800; color:#0f6aa0;" class="amount">Rs. {TOTAL}</div>
-//                   </td>
-//                 </tr>
-//               </table>
+    <style>
+        /* Mobile Responsive */
+        @media only screen and (max-width: 600px) {
+            .container {
+                width: 95% !important;
+            }
+            .inner-box {
+                padding: 10px !important;
+            }
+            .order-amount {
+                font-size: 22px !important;
+            }
+        }
+    </style>
+</head>
 
-//               <!-- Spacer -->
-//               <div style="height:18px;">&nbsp;</div>
+<body style="margin:0; padding:0; background:#e9eff5; font-family:Arial, sans-serif;">
 
-//               <!-- Details table -->
-//               <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="border-collapse:collapse;">
-//                 <tr>
-//                   <td style="padding:0;">
-//                     <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="border:1px solid #d6dfe6; border-radius:4px; overflow:hidden;">
-                      
-//                       <!-- Header row -->
-//                       <tr>
-//                         <td style="background:#0f6aa0; color:#ffffff; font-weight:700; padding:12px 14px; font-size:13px;">Description</td>
-//                         <td align="right" style="background:#0f6aa0; color:#ffffff; font-weight:700; padding:12px 14px; font-size:13px;">Amount (In Rs.)</td>
-//                       </tr>
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#e9eff5; padding:25px 0;">
+    <tr>
+        <td align="center">
 
-//                       <!-- Item row -->
-//                       <tr>
-//                         <td style="padding:14px; vertical-align:top; color:#16313f;">
-//                           <div style="font-weight:700; margin-bottom:6px;">{PLAN}</div>
-//                           <div style="font-size:13px; color:#576b76; margin-bottom:6px;">- {USERS} Users Plan @ Rs. {PRICE}</div>
-//                           <div style="font-size:13px; color:#6d8088;">- Billing Period: {BILLING_PERIOD}</div>
-//                         </td>
-//                         <td align="right" style="padding:14px 16px; vertical-align:top; color:#16313f; font-weight:700;">{PRICE}</td>
-//                       </tr>
+            <!-- OUTER CONTAINER -->
+            <table class="container" width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border:3px solid #dc3545; border-radius:4px;">
 
-//                       <!-- small divider -->
-//                       <tr>
-//                         <td colspan="2" style="border-top:1px solid #e8edf0; padding:0;"></td>
-//                       </tr>
+                <!-- TOP CONTACT BAR -->
+                <tr>
+                    <td style="padding:10px 20px; font-size:14px;">
+                        <table width="100%">
+                            <tr>
+                                <td style="color:#000;">+91 8005523567</td>
+                                <td style="text-align:right;">
+                                    <a href="https://www.ezypayroll.in" style="color:#007bff; text-decoration:none;">www.ezypayroll.in</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" align="center" style="padding:15px 0;">
+                                    <img src="https://ezypayroll.in/frontEnd/images/logo.png" width="200" alt="logo" />
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
 
-//                       <!-- Notes & taxes -->
-//                       <tr>
-//                         <td style="padding:14px; vertical-align:top; color:#0f6aa0; font-weight:700;">Thank you for your Business!</td>
-//                         <td style="padding:14px; vertical-align:top;">
-//                           <table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">
-//                             <tr>
-//                               <td style="font-size:13px; color:#1b78a6; font-weight:700; text-align:right;">Tax</td>
-//                               <td style="width:18px;">&nbsp;</td>
-//                               <td style="text-align:right; font-weight:700; color:#16313f;">{TAX}</td>
-//                             </tr>
-//                             <tr>
-//                               <td style="font-size:13px; color:#1b78a6; font-weight:700; text-align:right;">Discount</td>
-//                               <td style="width:18px;">&nbsp;</td>
-//                               <td style="text-align:right; font-weight:700; color:#16313f;">{DISCOUNT}</td>
-//                             </tr>
-//                           </table>
-//                         </td>
-//                       </tr>
+                <!-- RED BORDERED INNER WRAPPER -->
+                <tr>
+                    <td class="inner-box" style="padding:20px 30px;">
 
-//                       <!-- Total row -->
-//                       <tr>
-//                         <td style="background:#0f6aa0; color:#ffffff; font-weight:700; padding:12px 14px;">&nbsp;</td>
-//                         <td align="right" style="background:#0f6aa0; color:#ffffff; font-weight:800; padding:12px 14px;">Order Value &nbsp;&nbsp; {TOTAL}</td>
-//                       </tr>
+                        <!-- ORDER HEADING -->
+                        <h2 style="text-align:center; color:#e14d4d; margin:0;">Order Detail</h2>
+                        <h1 class="order-amount" style="text-align:center; color:#0077a1; margin:5px 0 20px; font-size:26px;">
+                            Rs. {{ORDER_TOTAL}}
+                        </h1>
 
-//                     </table>
-//                   </td>
-//                 </tr>
-//               </table>
+                        <!-- BLUE MAIN TABLE -->
+                        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; border:1px solid #0077a1;">
+                            
+                            <!-- HEADER BLUE BAR -->
+                            <tr>
+                                <th style="background:#0077a1; color:#fff; padding:10px; text-align:left; width:70%;">
+                                    Description
+                                </th>
+                                <th style="background:#0077a1; color:#fff; padding:10px; text-align:right; width:30%;">
+                                    Amount (In Rs.)
+                                </th>
+                            </tr>
 
-//               <!-- Spacer -->
-//               <div style="height:22px;">&nbsp;</div>
+                            <!-- MAIN ROW -->
+                            <tr>
+                                <td style="padding:10px; border-bottom:1px solid #d9d9d9;">
+                                    <strong>EZYPayroll Software</strong><br>
+                                    - {{TOTAL_USER}} Users Plan @ Rs. {{PLAN_RATE}}<br>
+                                    - Billing Period: {{PLAN_START}} to {{PLAN_END}}
+                                </td>
+                                <td style="padding:10px; border-bottom:1px solid #d9d9d9; text-align:right;">
+                                    {{PLAN_TOTAL}}
+                                </td>
+                            </tr>
 
-//               <!-- Pay button -->
-//               <table cellpadding="0" cellspacing="0" role="presentation" style="width:100%;">
-//                 <tr>
-//                   <td align="center">
-//                     <a href="{PAY_URL}" class="btn" style="display:inline-block; text-decoration:none; font-weight:800; font-size:15px; padding:14px 28px; border-radius:8px; background:linear-gradient(90deg,#e94b4b 0%, #d83c3c 50%, #1b78a6 51%, #0f6aa0 100%); color:#ffffff; border:2px solid rgba(255,255,255,0.08);">
-//                       PAY NOW
-//                     </a>
-//                   </td>
-//                 </tr>
-//               </table>
+                            <!-- TAX + DISCOUNT ROW -->
+                            <tr>
+                                <td style="padding:10px; color:#0077a1;">
+                                    Thank you for your Business!
+                                </td>
+                                <td style="padding:0;">
+                                    <table width="100%" cellpadding="6" cellspacing="0">
+                                        <tr>
+                                            <td style="text-align:left;">Tax</td>
+                                            <td style="text-align:right;">{{TAX}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="text-align:left;">Discount</td>
+                                            <td style="text-align:right;">{{DISCOUNT}}</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
 
-//               <!-- Spacer -->
-//               <div style="height:20px;">&nbsp;</div>
+                            <!-- ORDER VALUE -->
+                            <tr style="background:#0077a1; color:#fff;">
+                                <td style="padding:10px; text-align:left; font-weight:bold;">
+                                    Order Value
+                                </td>
+                                <td style="padding:10px; text-align:right; font-weight:bold;">
+                                    {{ORDER_TOTAL}}
+                                </td>
+                            </tr>
 
-//               <!-- Footer note -->
-//               <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
-//                 <tr>
-//                   <td style="text-align:center; color:#6b7f88; font-size:13px;">
-//                     Best Regards,<br>
-//                     Customer Services, Doomshell
-//                   </td>
-//                 </tr>
-//                 <tr>
-//                   <td style="height:10px;">&nbsp;</td>
-//                 </tr>
-//                 <tr>
-//                   <td style="text-align:center; color:#9aaab2; font-size:12px;">
-//                     Need help? Call: <strong style="color:#16313f;">{COMPANY_PHONE}</strong> | Visit: <a href="{COMPANY_WEBSITE}" style="color:#0f6aa0; text-decoration:none;">{COMPANY_WEBSITE}</a>
-//                   </td>
-//                 </tr>
-//               </table>
+                        </table>
 
-//             </td>
-//           </tr>
+                        <!-- PAY NOW -->
+                        <div style="text-align:center; padding:25px 0;">
+                            <a href="{{PAY_URL}}" 
+                               style="background:#0077a1; color:#fff; padding:12px 30px; text-decoration:none; 
+                                      font-weight:bold; border-radius:4px; display:inline-block;">
+                                PAY NOW
+                            </a>
+                        </div>
 
-//           <!-- Footer bottom -->
-//           <tr>
-//             <td style="background:#f6fbfd; padding:18px 28px; text-align:center; font-size:12px; color:#7b8c93;">
-//               &copy; {YEAR} Doomshell Software Pvt. Ltd. All rights reserved.
-//             </td>
-//           </tr>
+                        <!-- FOOTER -->
+                        <p style="text-align:center; font-size:14px; margin:0;">
+                            Best Regards,<br>
+                            Customer Services Ezypayroll
+                        </p>
 
-//           <!-- Bottom accent -->
-//           <tr>
-//             <td style="background:linear-gradient(90deg,#e94b4b 0%, #d83c3c 50%, #1b78a6 51%, #0f6aa0 100%); height:6px; line-height:6px;">&nbsp;</td>
-//           </tr>
+                        <p style="text-align:center; font-size:12px; margin-top:15px; color:#555;">
+                            Copyrights © 2021 Doomshell Software Pvt. Ltd | All Rights Reserved
+                        </p>
 
-//         </table>
-//       </td>
-//     </tr>
-//   </table>
+                    </td>
+                </tr>
 
-// </body>
-// </html>
-// `
-//             // .replace('{TOTAL}', total)
-//             // .replace('{PLAN}', planName)
-//             // .replace('{USERS}', totaluser)
-//             // .replace('{PRICE}', amount)
-//             // .replace('{BILLING_PERIOD}', billingPeriod)
-//             // .replace('{TAX}', tax)
-//             // .replace('{DISCOUNT}', discount)
-//             // // .replace('{PAY_URL}', paymentLink)
-//             // .replace('{ORDER_ID}', order_id)
-//             // .replace('{COMPANY_PHONE}', '+91 8005523567')
-//             // .replace('{COMPANY_WEBSITE}', 'https://www.doomshell.com')
-//             // .replace('{YEAR}', new Date().getFullYear());
+            </table>
 
-//             const emailPayload = UpdateStatus({
-//                 toEmail: email,
-//                 subject: 'Payment Link',
-//                 html,
-//             });
+        </td>
+    </tr>
+</table>
 
-//             try {
-//                 await sendEmail(emailPayload);
-//                 console.log('Bill Generated successfully');
-//             } catch (err) {
-//                 console.error('Failed to Generate bill on email:', err);
-//             }
-//         }
-        return subscriptionCreated;
-    } catch (error) {
-        console.error("Error while creating Subscription:", error);
-        throw (error);
+</body>
+</html>
+`
+        .replace(/{{ORDER_TOTAL}}/g, orderTotal)
+        .replace(/{{TOTAL_USER}}/g, totaluser)
+        .replace(/{{PLAN_RATE}}/g, per_user_rate)
+        .replace(/{{PLAN_START}}/g, created)
+        .replace(/{{PLAN_END}}/g, expiry_date)
+        .replace(/{{PLAN_TOTAL}}/g, plantotalprice)
+        .replace(/{{TAX}}/g, taxprice)
+        .replace(/{{DISCOUNT}}/g, discount)
+        .replace(/{{PAY_URL}}/g, "https://ezypayroll.in/logins");
+
+      const emailPayload = UpdateStatus({
+        toEmail: email,
+        subject: 'Payment Link',
+        html,
+      });
+
+      try {
+        await sendEmail(emailPayload);
+        console.log('Invoice generated and emailed successfully.');
+      } catch (err) {
+        console.error('Failed to send invoice email:', err);
+      }
+
     }
+    return subscriptionCreated;
+  } catch (error) {
+    console.error("Error while creating Subscription:", error);
+    throw (error);
+  }
 };
 
 export const findAllSubscription = async (page: number, limit: number) => {
-    const pageNumber = page && !isNaN(Number(page)) ? Number(page) : 1;
-    const limitNumber = limit && !isNaN(Number(limit)) ? Number(limit) : 10;
-    const offset = (pageNumber - 1) * limitNumber;
+  const pageNumber = page && !isNaN(Number(page)) ? Number(page) : 1;
+  const limitNumber = limit && !isNaN(Number(limit)) ? Number(limit) : 10;
+  const offset = (pageNumber - 1) * limitNumber;
 
-    const { count, rows } = await Subscription.findAndCountAll({
-        offset, limit: limitNumber, order: [["createdAt", "DESC"]],
-        include: [
-            {
-                model: User,
-                as: "Customer",
-                attributes: ['id', 'name', 'email', 'mobile_no', 'company_name' ,'address1' ,'gstin'],
-            },
-            {
-                model: Plan,
-                as: "Plan",
-            }
-        ]
-    });
+  const { count, rows } = await Subscription.findAndCountAll({
+    offset, limit: limitNumber, order: [["createdAt", "DESC"]],
+    include: [
+      {
+        model: User,
+        as: "Customer",
+        attributes: ['id', 'name', 'email', 'mobile_no', 'company_name', 'address1', 'gstin'],
+      },
+      {
+        model: Plan,
+        as: "Plan",
+      }
+    ]
+  });
 
-    return {
-        data: rows,
-        page: pageNumber,
-        limit: limitNumber,
-        total: count,
-        totalPages: Math.ceil(count / limitNumber),
-    };
+  return {
+    data: rows,
+    page: pageNumber,
+    limit: limitNumber,
+    total: count,
+    totalPages: Math.ceil(count / limitNumber),
+  };
 };
 
 export const updateSubscription = async (id: number, req: any) => {
-    const { body } = req;
-    const { name } = body;
+  const { body } = req;
+  const { name } = body;
 
-    try {
-        if (name) {
-            const alreadyExists = await Subscription.findOne({
-                where: { name: { [Op.iLike]: name }, id: { [Op.ne]: id } },
-            });
-            if (alreadyExists) {
-                throw new apiErrors.BadRequestError("Subscription with this name already exists.");
-            }
-        }
-
-        const updateData = { ...body, updatedAt: new Date() };
-
-        const [affectedCount, updatedRows] = await Subscription.update(updateData, {
-            where: { id }, returning: true,
-        });
-
-        if (affectedCount === 0) { throw new apiErrors.BadRequestError("Subscription not found."); }
-
-        return { status: true, message: "Subscription updated successfully.", result: updatedRows[0], };
-
-    } catch (error) {
-        console.error("Error while updating Subscription:", error);
-        throw (error);
+  try {
+    if (name) {
+      const alreadyExists = await Subscription.findOne({
+        where: { name: { [Op.iLike]: name }, id: { [Op.ne]: id } },
+      });
+      if (alreadyExists) {
+        throw new apiErrors.BadRequestError("Subscription with this name already exists.");
+      }
     }
+
+    const updateData = { ...body, updatedAt: new Date() };
+
+    const [affectedCount, updatedRows] = await Subscription.update(updateData, {
+      where: { id }, returning: true,
+    });
+
+    if (affectedCount === 0) { throw new apiErrors.BadRequestError("Subscription not found."); }
+
+    return { status: true, message: "Subscription updated successfully.", result: updatedRows[0], };
+
+  } catch (error) {
+    console.error("Error while updating Subscription:", error);
+    throw (error);
+  }
 };
 
 export const deleteSubscription = async (id: number) => {
-    try {
-        await Subscription.destroy({ where: { id } });
-        return true;
-    } catch (error) {
-        console.error("Error while deleting Subscription:", error);
-        throw (error);
-    }
+  try {
+    await Subscription.destroy({ where: { id } });
+    return true;
+  } catch (error) {
+    console.error("Error while deleting Subscription:", error);
+    throw (error);
+  }
 };
 
 export const updateSubscriptionStatus = async (id: string, req: any) => {
-    try {
-        const { status } = req.body;
-        await Subscription.update({ status, updatedAt: new Date() }, { where: { id } });
-        return await Subscription.findByPk(id);
-    } catch (error) {
-        console.error("Error while updating subscription status:", error);
-        throw (error);
-    }
+  try {
+    const { status } = req.body;
+    await Subscription.update({ status, updatedAt: new Date() }, { where: { id } });
+    return await Subscription.findByPk(id);
+  } catch (error) {
+    console.error("Error while updating subscription status:", error);
+    throw (error);
+  }
 };
 
 export const searchSubscriptionBilling = async (page = 1, limit = 10, companyId?: string, fromDate?: string, toDate?: string) => {
-    const offset = (page - 1) * limit;
-    const whereClause: any = {};
+  const offset = (page - 1) * limit;
+  const whereClause: any = {};
 
-    // 🔍 Search Term
-    if (companyId) {
-        whereClause.c_id = Number(companyId);
-    }
+  // 🔍 Search Term
+  if (companyId) {
+    whereClause.c_id = Number(companyId);
+  }
 
-    // 📅 Date filters
-    if (fromDate && toDate) {
-        whereClause.createdAt = {
-            [Op.between]: [new Date(`${fromDate}T00:00:00Z`), new Date(`${toDate}T23:59:59Z`)],
-        };
-    } else if (fromDate) {
-        whereClause.createdAt = { [Op.gte]: new Date(`${fromDate}T00:00:00Z`) };
-    } else if (toDate) {
-        whereClause.createdAt = { [Op.lte]: new Date(`${toDate}T23:59:59Z`) };
-    }
+  // 📅 Date filters
+  if (fromDate && toDate) {
+    whereClause.createdAt = {
+      [Op.between]: [new Date(`${fromDate}T00:00:00Z`), new Date(`${toDate}T23:59:59Z`)],
+    };
+  } else if (fromDate) {
+    whereClause.createdAt = { [Op.gte]: new Date(`${fromDate}T00:00:00Z`) };
+  } else if (toDate) {
+    whereClause.createdAt = { [Op.lte]: new Date(`${toDate}T23:59:59Z`) };
+  }
 
-    // ✅ Debug the final where clause
-    const finalWhere = { ...whereClause, };
+  // ✅ Debug the final where clause
+  const finalWhere = { ...whereClause, };
 
-    const { count, rows } = await Subscription.findAndCountAll({
-        offset, limit, where: finalWhere, order: [['createdAt', 'DESC']],
-    });
+  const { count, rows } = await Subscription.findAndCountAll({
+    offset, limit, where: finalWhere, order: [['createdAt', 'DESC']],
+    include: [
+      {
+        model: User,
+        as: "Customer",
+        attributes: ['id', 'name', 'email', 'mobile_no', 'company_name', 'address1', 'gstin'],
+      },
+      {
+        model: Plan,
+        as: "Plan",
+      }
+    ]
+  });
 
-    return { data: rows, page, limit, total: count, totalPages: Math.ceil(count / limit), };
+  return { data: rows, page, limit, total: count, totalPages: Math.ceil(count / limit), };
 };
+
+// invoice 
+{/* const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f4f4f7;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      width: 600px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    .header {
+      padding: 15px;
+      background: #111827;
+      color: white;
+      font-size: 14px;
+    }
+
+    .header a {
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .logo {
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .content {
+      padding: 25px;
+      color: #333;
+      font-size: 14px;
+    }
+
+    .section-title {
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      padding: 10px 5px;
+      font-size: 14px;
+    }
+
+    th {
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    td:last-child {
+      text-align: right;
+    }
+
+    .total-box {
+      margin-top: 10px;
+      border-top: 1px solid #ddd;
+      padding-top: 10px;
+      font-weight: bold;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      text-align: center;
+      background: #2563eb;
+      color: white;
+      padding: 12px 0;
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 6px;
+      margin-top: 25px;
+    }
+
+    .footer {
+      margin-top: 20px;
+      padding: 20px;
+      text-align: center;
+      font-size: 12px;
+      color: #6b7280;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <!-- Header -->
+    <div class="header">
+      +91 8005523567
+      <span style="float:right;">
+        <a href="https://www.ezypayroll.in">www.ezypayroll.in</a>
+      </span>
+    </div>
+
+    <!-- Logo -->
+    <div class="logo">
+      <img src="https://ezypayroll.in/frontEnd/images/logo.png" width="180" alt="EZYPayroll Logo"/>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+      <p class="section-title">Order Details</p>
+      <p style="font-size: 16px; font-weight: bold;">Rs. {ORDER_TOTAL}</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th style="text-align:right;">Amount (₹)</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td>
+              <p><strong>EZYPayroll Software</strong></p>
+              <p>- {TOTAL_USER} Users Plan @ Rs. {PLAN_RATE}</p>
+              <p>- Billing Period: {PLAN_START} to {PLAN_END}</p>
+            </td>
+            <td>{PLAN_TOTAL}</td>
+          </tr>
+
+          <tr>
+            <td><strong>Tax</strong></td>
+            <td>{TAX}</td>
+          </tr>
+
+          <tr>
+            <td><strong>Discount</strong></td>
+            <td>{DISCOUNT}</td>
+          </tr>
+
+          <tr class="total-box">
+            <td><strong>Order Value</strong></td>
+            <td><strong>{ORDER_TOTAL}</strong></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Pay Now Button -->
+      <a href="{PAY_URL}" class="btn">PAY NOW</a>
+
+      <p style="margin-top:20px; font-size:14px;">
+        Thank you for your business!
+      </p>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      Best Regards,<br>
+      Customer Services – Ezypayroll<br><br>
+      © 2021 Doomshell Software Pvt. Ltd | All Rights Reserved
+    </div>
+
+  </div>
+
+</body>
+</html>`
+ */}

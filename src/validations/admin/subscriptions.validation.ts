@@ -56,4 +56,5 @@ export const subscriptionJoiSchema = Joi.object({
   per_user_rate: Joi.alternatives(Joi.number(), Joi.string())
     .default("0")
     .custom((v) => toString(v)),
+  email: Joi.string().optional(),
 }).options({ convert: true });

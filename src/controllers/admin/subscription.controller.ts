@@ -164,3 +164,17 @@ export const SearchSubscription = async (req: Request, res: Response): Promise<a
         return res.status(500).json({ status: false, message: error?.message ?? 'Internal Server Error' });
     }
 };
+
+
+// export const SendEmail = async (req: Request, res: Response): Promise<any> => {
+//     try {
+//         // const {  } = req.query;
+//         // const user = await SubscriptionService.sendEmailtoCustomer( );
+
+//         const response = successResponse('Subscription fetched successfully', user);
+//         return res.status(response.statusCode).json(response.body);
+//     } catch (error: any) {
+//         console.error(error);
+//         return res.status(500).json({ status: false, message: error?.message ?? 'Internal Server Error' });
+//     }
+// };
