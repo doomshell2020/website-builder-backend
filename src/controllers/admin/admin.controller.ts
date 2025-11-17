@@ -165,6 +165,14 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
       return res.status(401).json({ status: false, message: "❌ This user account is not approved or active.", });
     }
 
+    // 🧩 Subscribers Approved Only
+    if (user?.role != "1" && user?.subscriptionData?.[0]?.status !== 'Y') {
+      return res.status(401).json({
+        status: false,
+        message: "Subscription expired. Please renew your plan.",
+      });
+    }
+
     // 🧩 Step 5: Generate JWT token
     const token = await createToken({
       id: user.id as number,

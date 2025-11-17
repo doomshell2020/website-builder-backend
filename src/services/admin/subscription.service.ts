@@ -51,12 +51,29 @@ export const createSubscription = async (req: any) => {
       isdrop, dropdate, createdAt, payment_date, razorpay_order_id,
       cgst, sgst, igst, per_user_rate, email, } = req.body;
 
-    const planTotal = Number(plantotalprice) || 0;
-    const discountAmount = Number(discount) || 0;
-    const taxAmount = Number(taxprice) || 0;
-    const orderTotal: any = planTotal - discountAmount + taxAmount;
-
     const subscriptionCreated: any = await Subscription.create(req.body);
+
+    // also we can use this :--
+    // const subsCreatedSuccessfully: any = await findSubscriptionById(subscriptionCreated?.id);
+
+    const formatDateTime = (date: string | Date) => {
+      const d = new Date(date);
+
+      const day = String(d.getDate()).padStart(2, "0");
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const year = d.getFullYear();
+
+      let hours = d.getHours();
+      const minutes = String(d.getMinutes()).padStart(2, "0");
+
+      const ampm = hours >= 12 ? "PM" : "AM";
+      hours = hours % 12 || 12; // convert 0 → 12 for midnight
+
+      const hoursFormatted = String(hours).padStart(2, "0");
+
+      return `${day}-${month}-${year} ${hoursFormatted}:${minutes} ${ampm}`;
+    };
+
     if (subscriptionCreated) {
       const html = `<!DOCTYPE html>
 <html lang="en">
@@ -135,11 +152,11 @@ export const createSubscription = async (req: any) => {
                             <tr>
                                 <td style="padding:10px; border-bottom:1px solid #d9d9d9;">
                                     <strong>EZYPayroll Software</strong><br>
-                                    - {{TOTAL_USER}} Users Plan @ Rs. {{PLAN_RATE}}<br>
+                                    - Plan @ Rs. {{PLAN_RATE}}<br>
                                     - Billing Period: {{PLAN_START}} to {{PLAN_END}}
                                 </td>
                                 <td style="padding:10px; border-bottom:1px solid #d9d9d9; text-align:right;">
-                                    {{PLAN_TOTAL}}
+                                    {{PLAN_RATE}}
                                 </td>
                             </tr>
 
@@ -205,11 +222,11 @@ export const createSubscription = async (req: any) => {
 </body>
 </html>
 `
-        .replace(/{{ORDER_TOTAL}}/g, orderTotal)
+        .replace(/{{ORDER_TOTAL}}/g, plantotalprice)
         .replace(/{{TOTAL_USER}}/g, totaluser)
         .replace(/{{PLAN_RATE}}/g, per_user_rate)
-        .replace(/{{PLAN_START}}/g, created)
-        .replace(/{{PLAN_END}}/g, expiry_date)
+        .replace(/{{PLAN_START}}/g, formatDateTime(created))
+        .replace(/{{PLAN_END}}/g, formatDateTime(expiry_date))
         .replace(/{{PLAN_TOTAL}}/g, plantotalprice)
         .replace(/{{TAX}}/g, taxprice)
         .replace(/{{DISCOUNT}}/g, discount)
@@ -539,5 +556,15 @@ export const searchSubscriptionBilling = async (page = 1, limit = 10, companyId?
   </div>
 
 </body>
-</html>`
+</html>` 
+  .replaceAll('{ORDER_TOTAL}', orderTotal)
+  .replaceAll('{TOTAL_USER}', totalUser)
+  .replaceAll('{PLAN_RATE}', planRate)
+  .replaceAll('{PLAN_START}', planStart)
+  .replaceAll('{PLAN_END}', planEnd)
+  .replaceAll('{PLAN_TOTAL}', planTotal)
+  .replaceAll('{TAX}', tax)
+  .replaceAll('{DISCOUNT}', discount)
+  .replaceAll('{PAY_URL}', payUrl);
  */}
+ 

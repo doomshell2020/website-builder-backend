@@ -1,6 +1,6 @@
 // services/user.service.ts
 import db from '../../models/index'; // Make sure your model is loaded in `models/index.ts`
-const User = db.User;
+const { User, Role, Theme, Subscription } = db;
 import { Request, Response } from 'express';
 import * as cacheUtil from '../../utils/cache.util';
 // Create user
@@ -24,12 +24,26 @@ export const findUserByMobile = async (mobile: string) => {
 // Login (by email)
 export const findUserByEmailLogin = async (email: string) => {
   const user = await User.findOne({
-    where: {
-      email,
-    },
+    where: { email },
+    include: [
+      {
+        model: Role,
+        as: "roleData",
+        attributes: ["id", "name", "description"],
+      },
+      {
+        model: Subscription,
+        as: "subscriptionData",
+        separate: true, // ✅ REQUIRED for limit + order to work
+        limit: 1, // get latest only
+        order: [["createdAt", "DESC"]],
+      }
+    ],
   });
+
   return user;
 };
+
 
 // Forgot password (same as find by email or mobile)
 export const findUserByEmailForgot = findUserByEmail;
