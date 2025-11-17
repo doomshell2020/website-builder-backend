@@ -165,16 +165,28 @@ export const SearchSubscription = async (req: Request, res: Response): Promise<a
     }
 };
 
+// Send Email
+export const SendEmail = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const { id } = req.params;
+        if (!id) { throw new apiErrors.BadRequestError('ID is required.'); }
+        const user = await SubscriptionService.sendMail(id);
+        const response = successResponse('Email generated successfully', user);
+        return res.status(response.statusCode).json(response.body);
+    } catch (error: any) {
+        console.error(error);
+        return res.status(500).json({ status: false, message: error?.message ?? 'Internal Server Error' });
+    }
+};
 
-// export const SendEmail = async (req: Request, res: Response): Promise<any> => {
-//     try {
-//         // const {  } = req.query;
-//         // const user = await SubscriptionService.sendEmailtoCustomer( );
-
-//         const response = successResponse('Subscription fetched successfully', user);
-//         return res.status(response.statusCode).json(response.body);
-//     } catch (error: any) {
-//         console.error(error);
-//         return res.status(500).json({ status: false, message: error?.message ?? 'Internal Server Error' });
-//     }
-// };
+// Inactivate Expired Subscription
+export const InactivateExpiredSubs = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const result = await SubscriptionService.bulkInactiveExpiredSubscriptions();
+        return res.status(200).json(result);
+    } catch (err: any) {
+        return res.status(500).json({
+            status: false, message: err.message || "Internal server error",
+        });
+    }
+};

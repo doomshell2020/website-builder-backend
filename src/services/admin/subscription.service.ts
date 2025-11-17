@@ -54,7 +54,7 @@ export const createSubscription = async (req: any) => {
     const subscriptionCreated: any = await Subscription.create(req.body);
 
     // also we can use this :--
-    // const subsCreatedSuccessfully: any = await findSubscriptionById(subscriptionCreated?.id);
+    // const Data: any = await findSubscriptionById(subscriptionCreated?.id);
 
     const formatDateTime = (date: string | Date) => {
       const d = new Date(date);
@@ -372,6 +372,255 @@ export const searchSubscriptionBilling = async (page = 1, limit = 10, companyId?
   });
 
   return { data: rows, page, limit, total: count, totalPages: Math.ceil(count / limit), };
+};
+
+export const sendMail = async (id: string) => {
+  try {
+    // const {
+    //   id, plan_id, c_id, created, expiry_date, status,
+    //   payment_id, order_id, signature_razorpay, totaluser,
+    //   plantotalprice, taxprice, discount, payment_detail,
+    //   isdrop, dropdate, createdAt, payment_date, razorpay_order_id,
+    //   cgst, sgst, igst, per_user_rate, email, } = req.body;
+
+    // also we can use this :--
+    const Data: any = await Subscription.findOne({
+      where: { c_id: id, status: "Y" },
+      include: [
+        {
+          model: User,
+          as: "Customer",
+          attributes: ["id", "name", "email", "mobile_no", "company_name"],
+        },
+        {
+          model: Plan,
+          as: "Plan",
+        }
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+
+    const formatDateTime = (date: string | Date) => {
+      const d = new Date(date);
+
+      const day = String(d.getDate()).padStart(2, "0");
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const year = d.getFullYear();
+
+      let hours = d.getHours();
+      const minutes = String(d.getMinutes()).padStart(2, "0");
+
+      const ampm = hours >= 12 ? "PM" : "AM";
+      hours = hours % 12 || 12; // convert 0 → 12 for midnight
+
+      const hoursFormatted = String(hours).padStart(2, "0");
+
+      return `${day}-${month}-${year} ${hoursFormatted}:${minutes} ${ampm}`;
+    };
+
+    if (Data) {
+      const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <style>
+        @media only screen and (max-width: 600px) {
+            .container {
+                width: 95% !important;
+            }
+            .inner-box {
+                padding: 10px !important;
+            }
+        }
+    </style>
+</head>
+
+<body style="margin:0; padding:0; background:#e9eff5; font-family:Arial, sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#e9eff5; padding:25px 0;">
+    <tr>
+        <td align="center">
+
+            <!-- OUTER WRAPPER -->
+            <table class="container" width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border:3px solid #dc3545; border-radius:4px;">
+
+                <!-- TOP BAR -->
+                <tr>
+                    <td style="padding:10px 20px; font-size:14px;">
+                        <table width="100%">
+                            <tr>
+                                <td style="color:#000;">+91 8005523567</td>
+                                <td style="text-align:right;">
+                                    <a href="https://www.ezypayroll.in" 
+                                       style="color:#007bff; text-decoration:none;">www.ezypayroll.in</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" align="center" style="padding:15px 0;">
+                                    <img src="https://ezypayroll.in/frontEnd/images/logo.png" width="200" alt="logo" />
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- CONTENT AREA -->
+                <tr>
+                    <td class="inner-box" style="padding:20px 30px;">
+
+                        <!-- WELCOME TITLE -->
+                        <h2 style="text-align:center; color:#0077a1; margin:0; font-size:24px;">
+                            Welcome to EZYPayroll!
+                        </h2>
+
+                        <p style="text-align:center; font-size:15px; color:#333; margin-top:10px;">
+                            We’re excited to have you as part of the EZYPayroll family.  
+                            Your business now has access to a powerful suite of tools designed 
+                            to simplify operations, enhance productivity, and support growth.
+                        </p>
+
+                        <!-- FEATURES BOX -->
+                        <table width="100%" cellpadding="10" cellspacing="0" 
+                               style="border:1px solid #d6d6d6; background:#f9f9f9; border-radius:4px; margin-top:20px;">
+
+                            <tr>
+                                <td style="font-size:15px; color:#444;">
+                                    <strong style="color:#0077a1;">✔ Secure Web Hosting</strong><br>
+                                    Host your business portal on fast, secure, and high-availability cloud infrastructure.
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="font-size:15px; color:#444;">
+                                    <strong style="color:#0077a1;">✔ Custom Business Website</strong><br>
+                                    Get a fully responsive and professionally designed website tailored to your brand.
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="font-size:15px; color:#444;">
+                                    <strong style="color:#0077a1;">✔ Separate Dedicated Web Panel</strong><br>
+                                    Your own admin/dashboard panel to manage your business, customers, and workflows.
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="font-size:15px; color:#444;">
+                                    <strong style="color:#0077a1;">✔ Continuous Support & Updates</strong><br>
+                                    Our team ensures seamless updates, new features, and fast customer support whenever you need it.
+                                </td>
+                            </tr>
+
+                        </table>
+
+                        <!-- CALL TO ACTION -->
+                        <div style="text-align:center; padding:30px 0;">
+                            <a href="{{DASHBOARD_URL}}" 
+                               style="background:#0077a1; color:#fff; padding:12px 30px; text-decoration:none; 
+                                      font-weight:bold; border-radius:4px; display:inline-block;">
+                                GO TO YOUR DASHBOARD
+                            </a>
+                        </div>
+
+                        <!-- FOOTER -->
+                        <p style="text-align:center; font-size:14px; margin:0;">
+                            Best Regards,<br>
+                            Customer Services Team – EZYPayroll
+                        </p>
+
+                        <p style="text-align:center; font-size:12px; margin-top:15px; color:#555;">
+                            Copyrights © 2021 Doomshell Software Pvt. Ltd | All Rights Reserved
+                        </p>
+
+                    </td>
+                </tr>
+
+            </table>
+
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>
+`
+      // .replace(/{{ORDER_TOTAL}}/g, plantotalprice)
+      // .replace(/{{TOTAL_USER}}/g, totaluser)
+      // .replace(/{{PLAN_RATE}}/g, per_user_rate)
+      // .replace(/{{PLAN_START}}/g, formatDateTime(created))
+      // .replace(/{{PLAN_END}}/g, formatDateTime(expiry_date))
+      // .replace(/{{PLAN_TOTAL}}/g, plantotalprice)
+      // .replace(/{{TAX}}/g, taxprice)
+      // .replace(/{{DISCOUNT}}/g, discount)
+      // .replace(/{{PAY_URL}}/g, "https://ezypayroll.in/logins");
+
+      const emailPayload = UpdateStatus({
+        toEmail: `${Data?.Customer?.email}`,
+        subject: 'Demo',
+        html,
+      });
+      try {
+        await sendEmail(emailPayload);
+        console.log('Email generated successfully.');
+      } catch (err) {
+        console.error('Failed to send demo email:', err);
+      }
+      return true;
+    } else {
+      throw new apiErrors.BadRequestError("Subscription not active anymore.");
+    }
+  } catch (error) {
+    console.error("Error while sending email:", error);
+    throw (error);
+  }
+};
+
+export const bulkInactiveExpiredSubscriptions = async () => {
+  try {
+
+    const formatDateTime = (date = new Date()) => {
+      const pad = (n: number) => String(n).padStart(2, "0");
+
+      return (
+        date.getFullYear() +
+        "-" +
+        pad(date.getMonth() + 1) +
+        "-" +
+        pad(date.getDate()) +
+        " " +
+        pad(date.getHours()) +
+        ":" +
+        pad(date.getMinutes()) +
+        ":" +
+        pad(date.getSeconds())
+      );
+    };
+
+    const now = formatDateTime(new Date());
+
+    // 1. Fetch all subscriptions that are active but expired
+    const expiredSubs = await Subscription.findAll({
+      where: { status: "Y", expiry_date: { [Op.lt]: now, }, },
+    });
+
+    console.log("expiredSubs: ", expiredSubs);
+
+    // If none found
+    if (!expiredSubs.length) {
+      return { status: true, message: "No expired subscriptions found.", updated: 0, };
+    }
+
+    // 2. Update all statuses in bulk
+    const ids = expiredSubs.map((s: any) => s.id);
+    const updateCount = await Subscription.update({ status: "N" }, { where: { id: ids }, });
+
+    return { status: true, message: "Expired subscriptions inactivated successfully.", updated: updateCount[0], };
+  } catch (err: any) {
+    console.error("Bulk inactivate error:", err);
+    throw new Error("Failed to inactivate expired subscriptions. " + err.message);
+  }
 };
 
 // invoice 
