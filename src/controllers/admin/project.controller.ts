@@ -5,9 +5,6 @@ import { apiErrors } from "../../utils/api-errors";
 import { convertToIST } from '../../middleware/date';
 
 export const canStartProject = (user: any) => {
-
-    console.log('user: >>',user?.subscriptionData?.[0]);
-
     // ✅ Admin always allowed
     if (user?.role === "1") return true;
 
@@ -22,10 +19,7 @@ export const canStartProject = (user: any) => {
     // 🔍 Check expiry
     const nowIST = convertToIST(new Date());
     const expiryIST = convertToIST(sub.expiry_date);
-
-    console.log(nowIST,expiryIST);
-    
-
+  
     // ❌ Subscription expired
     if (expiryIST.isBefore(nowIST)) return false;
 
