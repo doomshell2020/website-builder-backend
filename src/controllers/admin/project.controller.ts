@@ -7,20 +7,14 @@ import { convertToIST } from '../../middleware/date';
 export const canStartProject = (user: any) => {
     // ✅ Admin always allowed
     if (user?.role === "1") return true;
-
     const sub = user?.subscriptionData?.[0];
 
-    // ❌ No subscription found
     if (!sub) return false;
-
-    // ❌ Status not active
     if (sub.status !== "Y") return false;
 
-    // 🔍 Check expiry
     const nowIST = convertToIST(new Date());
     const expiryIST = convertToIST(sub.expiry_date);
-  
-    // ❌ Subscription expired
+
     if (expiryIST.isBefore(nowIST)) return false;
 
     // ✅ All good — subscription active
