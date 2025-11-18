@@ -1,6 +1,6 @@
 import { Op } from "sequelize";
 import db from "../../models/index";
-const { User, Role, Theme } = db;
+const { User, Role, Theme, Subscription } = db;
 
 export const findProject = async (projectName: string) => {
     return await User.findOne({
@@ -20,6 +20,12 @@ export const findProject = async (projectName: string) => {
                 as: 'Theme',
                 attributes: ['id', 'name', 'slug', 'description'],
             },
+            {
+                model: Subscription,
+                as: "subscriptionData",
+                limit: 1,
+                order: [["createdAt", "DESC"]],
+            }
         ],
     });
 };
@@ -55,6 +61,12 @@ export const findProjectByDomain = async (domain: string) => {
                     as: "Theme",
                     attributes: ["id", "name", "slug", "description"],
                 },
+                {
+                    model: Subscription,
+                    as: "subscriptionData",
+                    limit: 1,
+                    order: [["createdAt", "DESC"]],
+                }
             ],
         });
 

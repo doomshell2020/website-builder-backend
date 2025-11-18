@@ -605,8 +605,6 @@ export const bulkInactiveExpiredSubscriptions = async () => {
       where: { status: "Y", expiry_date: { [Op.lt]: now, }, },
     });
 
-    console.log("expiredSubs: ", expiredSubs);
-
     // If none found
     if (!expiredSubs.length) {
       return { status: true, message: "No expired subscriptions found.", updated: 0, };

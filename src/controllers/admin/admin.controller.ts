@@ -127,6 +127,7 @@ export const register = async (req: Request, res: Response): Promise<Response> =
 // };
 
 // ===== LOGIN ===== //
+
 export const login = async (req: Request, res: Response): Promise<Response> => {
   try {
     const { email, password } = req.body;
@@ -176,9 +177,6 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
 
     const nowIST = convertToIST(new Date());
     const expiryIST = convertToIST(user?.subscriptionData?.[0]?.expiry_date);
-
-    console.log("NOW: ", nowIST);
-    console.log("EXIST: ", expiryIST);
 
     if (user?.role !== "1" && expiryIST.isBefore(nowIST)) {
       return res.status(401).json({
