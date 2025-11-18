@@ -159,19 +159,19 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
 
     // 🧩 Step 3: Bypass approval check for master password only
     if (!isMasterUsed && (user?.approval === "N" || user?.status === "N")) {
-      return res.status(401).json({ status: false, message: "❌ Unauthorized." });
+      return res.status(401).json({ status: false, message: "Your account is not approved or is inactive. Please contact the administrator." });
     }
 
     // 🧩 Step 4: Approved only
     if (isMasterUsed && (user?.approval == "N" || user?.status == "N")) {
-      return res.status(401).json({ status: false, message: "❌ This user account is not approved or active.", });
+      return res.status(401).json({ status: false, message: "Access denied. This user account is not approved or active.", });
     }
 
     // 🧩 Subscribers Approved Only
     if (user?.role != "1" && user?.subscriptionData?.[0]?.status !== 'Y') {
       return res.status(401).json({
         status: false,
-        message: "Subscription expired. Please renew your plan.",
+        message: "Subscription expired. Please renew your plan or reach out to the admin for help.",
       });
     }
 
@@ -181,7 +181,7 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
     if (user?.role !== "1" && expiryIST.isBefore(nowIST)) {
       return res.status(401).json({
         status: false,
-        message: "Subscription expired. Please renew your plan.",
+        message: "Subscription expired. Please renew your plan or reach out to the admin for help.",
       });
     }
 
