@@ -2,6 +2,7 @@ import db from "../../models/index";
 import { Op } from "sequelize";
 import { apiErrors } from '../../utils/api-errors';
 import { sendEmail } from '../../utils/email';
+import { formatPrice } from '../../utils/format-price';
 import { UpdateStatus } from '../../utils/email-templates';
 const { Subscription, User, Plan } = db;
 
@@ -222,14 +223,14 @@ export const createSubscription = async (req: any) => {
 </body>
 </html>
 `
-        .replace(/{{ORDER_TOTAL}}/g, plantotalprice)
-        .replace(/{{TOTAL_USER}}/g, totaluser)
-        .replace(/{{PLAN_RATE}}/g, per_user_rate)
+        .replace(/{{ORDER_TOTAL}}/g, formatPrice(plantotalprice))
+        // .replace(/{{TOTAL_USER}}/g, totaluser)
+        .replace(/{{PLAN_RATE}}/g, formatPrice(per_user_rate))
         .replace(/{{PLAN_START}}/g, formatDateTime(created))
         .replace(/{{PLAN_END}}/g, formatDateTime(expiry_date))
-        .replace(/{{PLAN_TOTAL}}/g, plantotalprice)
-        .replace(/{{TAX}}/g, taxprice)
-        .replace(/{{DISCOUNT}}/g, discount)
+        .replace(/{{PLAN_TOTAL}}/g, formatPrice(plantotalprice))
+        .replace(/{{TAX}}/g, formatPrice(taxprice))
+        .replace(/{{DISCOUNT}}/g, formatPrice(discount))
         .replace(/{{PAY_URL}}/g, "https://ezypayroll.in/logins");
 
       const emailPayload = UpdateStatus({
@@ -329,6 +330,17 @@ export const updateSubscriptionStatus = async (id: string, req: any) => {
     return await Subscription.findByPk(id);
   } catch (error) {
     console.error("Error while updating subscription status:", error);
+    throw (error);
+  }
+};
+
+export const updatePaymentStatus = async (id: string, req: any) => {
+  try {
+    const { isdrop } = req.body;
+    await Subscription.update({ isdrop, updatedAt: new Date() }, { where: { id } });
+    return await Subscription.findByPk(id);
+  } catch (error) {
+    console.error("Error while updating payment status:", error);
     throw (error);
   }
 };

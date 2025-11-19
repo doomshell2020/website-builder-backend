@@ -48,6 +48,7 @@ export default (sequelize: Sequelize) => {
       image: { type: DataTypes.TEXT, allowNull: true },
       company_logo: { type: DataTypes.TEXT, allowNull: false },
       status: { type: DataTypes.ENUM("Y", "N"), allowNull: false, defaultValue: "Y" },
+      gst_type: { type: DataTypes.ENUM("IGST", "CGST_SGST"), allowNull: false, defaultValue: "CGST_SGST" },
       approval: { type: DataTypes.CHAR(1), allowNull: false, defaultValue: 'N' },
       deleted: { type: DataTypes.ENUM("Y", "N"), allowNull: false, defaultValue: "N" },
       createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },

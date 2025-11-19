@@ -66,25 +66,35 @@ export const CreateSubscription = async (req: Request, res: Response) => {
     }
 };
 
-// Find Subscription Status
+// Update Subscription Status
 export const UpdateStatusSubscription = async (req: Request, res: Response) => {
     try {
         const id = req.params.id;
-        if (!id) {
-            throw new apiErrors.BadRequestError('Subscription ID is required.');
-        }
+        if (!id) { throw new apiErrors.BadRequestError('Subscription ID is required.'); }
 
         const Subscription = await SubscriptionService.findSubscriptionById(id);
         if (!Subscription) {
             return res.status(400).json({ status: false, message: 'Subscription not found.' });
         }
         const result = await SubscriptionService.updateSubscriptionStatus(id, req);
+        return res.json({ status: true, message: 'Subscription Status updated successfully!', data: result, });
+    } catch (error: any) {
+        console.error(error);
+        return res.status(500).json({ status: false, message: error?.message ?? 'Internal Server Error' });
+    }
+};
 
-        return res.json({
-            status: true,
-            message: 'Subscription Status updated successfully!',
-            data: result,
-        });
+// Update Payment Status
+export const UpdatePaymentStatus = async (req: Request, res: Response) => {
+    try {
+        const id = req.params.id;
+        if (!id) { throw new apiErrors.BadRequestError('Subscription ID is required.'); }
+        const Subscription = await SubscriptionService.findSubscriptionById(id);
+        if (!Subscription) {
+            return res.status(400).json({ status: false, message: 'Subscription not found.' });
+        }
+        const result = await SubscriptionService.updatePaymentStatus(id, req);
+        return res.json({ status: true, message: 'Payment status updated successfully!', data: result, });
     } catch (error: any) {
         console.error(error);
         return res.status(500).json({ status: false, message: error?.message ?? 'Internal Server Error' });
