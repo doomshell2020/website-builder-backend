@@ -17,11 +17,14 @@ export const findPlanById = async (id: string) => {
 
 export const findPlan = async (page: number, limit: number) => {
     try {
-        const planData = await Plan.findAndCountAll({
+        const { count, rows } = await Plan.findAndCountAll({
             where: { status: 'Y' },
             order: [["createdAt", "DESC"]],
         });
-        return planData;
+        return {
+            data: rows,
+            total: count,
+        };
     } catch (error) {
         console.error("Error fetching Plan:", error);
         throw error;
