@@ -14,7 +14,7 @@ export const findSubscriptionById = async (id: string) => {
         {
           model: User,
           as: "Customer",
-          attributes: ['id', 'name', 'email', 'mobile_no', 'company_name'],
+          attributes: ['id', 'name', 'email', 'mobile_no', 'company_logo', 'company_name'],
         },
         {
           model: Plan,
@@ -265,7 +265,7 @@ export const findAllSubscription = async (page: number, limit: number) => {
       {
         model: User,
         as: "Customer",
-        attributes: ['id', 'name', 'email', 'mobile_no', 'company_name', 'address1', 'gstin'],
+        attributes: ['id', 'name', 'email', 'mobile_no', 'company_name', 'company_logo', 'address1', 'gstin'],
       },
       {
         model: Plan,
@@ -374,7 +374,7 @@ export const searchSubscriptionBilling = async (page = 1, limit = 10, companyId?
       {
         model: User,
         as: "Customer",
-        attributes: ['id', 'name', 'email', 'mobile_no', 'company_name', 'address1', 'gstin'],
+        attributes: ['id', 'name', 'email', 'mobile_no', 'company_logo', 'company_name', 'address1', 'gstin'],
       },
       {
         model: Plan,
