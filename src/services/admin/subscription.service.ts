@@ -283,6 +283,42 @@ export const findAllSubscription = async (page: number, limit: number) => {
   };
 };
 
+export const findAllSubscriptionByUsers = async (id: string | number, page: number, limit: number) => {
+  const pageNumber = page && !isNaN(Number(page)) ? Number(page) : 1;
+  const limitNumber = limit && !isNaN(Number(limit)) ? Number(limit) : 10;
+  const offset = (pageNumber - 1) * limitNumber;
+
+  const { count, rows } = await Subscription.findAndCountAll({
+    where: { c_id: id, },
+    offset,
+    limit: limitNumber,
+    order: [["createdAt", "DESC"]],
+    include: [
+      {
+        model: User,
+        as: "Customer",
+        attributes: [
+          'id', 'name', 'email', 'mobile_no', 'company_name',
+          'company_logo', 'address1', 'gstin'
+        ],
+      },
+      {
+        model: Plan,
+        as: "Plan",
+      }
+    ]
+  });
+
+
+  return {
+    data: rows,
+    page: pageNumber,
+    limit: limitNumber,
+    total: count,
+    totalPages: Math.ceil(count / limitNumber),
+  };
+};
+
 export const updateSubscription = async (id: number, req: any) => {
   const { body } = req;
   const { name } = body;

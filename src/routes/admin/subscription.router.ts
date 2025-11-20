@@ -9,6 +9,7 @@ const router: Router = express.Router();
 router.get("/read-all", ErrorHandler(SubscriptionController.FindSubscription as any));
 router.get('/view/:id', ErrorHandler(SubscriptionController.FindSubscriptionById as any));
 router.get('/view-all', ErrorHandler(SubscriptionController.FindAllSubscriptions as any));
+router.get('/user-wise/:id', ErrorHandler(SubscriptionController.FindAllSubscriptionsByUser as any));
 router.post('/create', validate(schema.subscriptionJoiSchema) as any, ErrorHandler(SubscriptionController.CreateSubscription as any));
 router.patch('/status/:id', ErrorHandler(SubscriptionController.UpdateStatusSubscription as any));
 router.patch('/payment/:id', ErrorHandler(SubscriptionController.UpdatePaymentStatus as any));
