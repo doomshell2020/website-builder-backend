@@ -130,3 +130,17 @@ export const DeleteColumnToAllSchemas = async (req: Request, res: Response) => {
     const result = await schemaService.deleteColumnFromAllSchemas(tableName, columnName);
     res.json(result);
 };
+
+// export const ExportSchemaSQL = async (req: Request, res: Response) => {
+//     try {
+//         const schemaName = req.params.schema;
+//         console.log(">>>>>>>", schemaName);
+//         const { filePath, fileName }: any = await schemaService.exportSchemaSQL(schemaName);
+//         console.log('filePath: ', filePath);
+//         console.log('fileName: ', fileName);
+//         return res.download(filePath, fileName);
+//     } catch (error: any) {
+//         console.error(error);
+//         return res.status(500).json({ status: false, message: error?.message ?? 'Internal server error' });
+//     }
+// };

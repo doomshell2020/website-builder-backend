@@ -1,4 +1,7 @@
 import sequelize from '../../../config/database.config';
+import { exec } from "child_process";
+import path from "path";
+import fs from "fs";
 
 export const createSchema = async (name: string) => {
   try {
@@ -502,12 +505,13 @@ export const getAllSchemas = async (page = 1, limit = 10) => {
   try {
     const offset = (page - 1) * limit;
 
-    // Schemas to exclude
     const excludedSchemas = [
       'pg_catalog', 'information_schema', 'public', 'extensions', 'auth', 'graphql',
-      'graphql_public', 'pgbouncer', 'realtime', 'storage', 'vault', 'doomshell', 'tenantdemo', 'demo'
+      'graphql_public', 'pgbouncer', 'realtime', 'storage', 'vault',
+      'doomshell', 'tenantdemo', 'demo'
     ];
 
+    // Count schemas
     const [countResult]: any = await sequelize.query(`
       SELECT COUNT(*) AS total
       FROM information_schema.schemata
@@ -515,8 +519,10 @@ export const getAllSchemas = async (page = 1, limit = 10) => {
         AND schema_name NOT LIKE 'pg_toast%'
         AND schema_name NOT LIKE 'pg_temp%';
     `);
+
     const total = parseInt(countResult[0].total, 10);
 
+    // Get schema names
     const [schemasResult]: any = await sequelize.query(`
       SELECT schema_name
       FROM information_schema.schemata
@@ -532,29 +538,42 @@ export const getAllSchemas = async (page = 1, limit = 10) => {
     for (const row of schemasResult) {
       const schemaName = row.schema_name;
 
+      // Fetch tables
       const [tablesResult]: any = await sequelize.query(`
-        SELECT 
-          relname AS table_name,
-          reltuples::BIGINT AS estimated_rows
-        FROM pg_class
-        JOIN pg_namespace ON pg_namespace.oid = pg_class.relnamespace
-        WHERE pg_namespace.nspname = '${schemaName}'
-          AND pg_class.relkind = 'r';
+        SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema = '${schemaName}'
+          AND table_type = 'BASE TABLE';
       `);
 
+      // Fetch users
       const [usersResult]: any = await sequelize.query(`
         SELECT id, name, email, mobile_no, "createdAt"
         FROM public.cms_users
-        WHERE schema_name = '${schemaName}'
+        WHERE schema_name = '${schemaName}';
       `);
+
+      // 🚀 Fetch real table row counts
+      const tableData = [];
+
+      for (const tbl of tablesResult) {
+        const tableName = tbl.table_name;
+
+        const [countRes]: any = await sequelize.query(`
+          SELECT COUNT(*) AS row_count 
+          FROM "${schemaName}"."${tableName}";
+        `);
+
+        tableData.push({
+          tableName,
+          rowCount: parseInt(countRes[0].row_count, 10),
+        });
+      }
 
       schemas.push({
         schemaName,
-        createdAt: null,
-        tables: tablesResult.map((tbl: any) => ({
-          tableName: tbl.table_name,
-          rowCount: parseInt(tbl.estimated_rows, 10),
-        })),
+        tableCount: tableData.length,
+        tables: tableData,
         users: usersResult,
       });
     }
@@ -568,8 +587,51 @@ export const getAllSchemas = async (page = 1, limit = 10) => {
         totalPages: Math.ceil(total / limit),
       },
     };
+
   } catch (error: any) {
-    console.error('Error fetching schemas:', error);
-    throw new Error('Failed to fetch schemas');
+    console.error("Error fetching schemas:", error);
+    throw new Error("Failed to fetch schemas");
   }
 };
+
+// export const exportSchemaSQL = async (schemaName: string) => {
+//   return new Promise((resolve, reject) => {
+//     try {
+//       const backupDir = path.join(__dirname, "../backups");
+
+//       if (!fs.existsSync(backupDir)) {
+//         fs.mkdirSync(backupDir, { recursive: true });
+//       }
+
+//       const fileName = `${schemaName}_${Date.now()}.sql`;
+//       const filePath = path.join(backupDir, fileName);
+
+//       // 🔥 pg_dump command
+//       const cmd = `
+//         pg_dump \
+//           --dbname="${process.env.DB_URL}" \
+//           --schema="${schemaName}" \
+//           --format=plain \
+//           --inserts \
+//           --clean \
+//           --file="${filePath}"
+//       `;
+
+//       exec(cmd, (error, stdout, stderr) => {
+//         if (error) {
+//           console.error("Backup error:", error);
+//           return reject("Failed to export schema");
+//         }
+
+//         return resolve({
+//           success: true,
+//           filePath,
+//           fileName
+//         });
+//       });
+
+//     } catch (error) {
+//       reject(error);
+//     }
+//   });
+// };

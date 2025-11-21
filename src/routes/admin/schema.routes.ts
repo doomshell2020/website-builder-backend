@@ -11,6 +11,7 @@ router.post("/add-table", ErrorHandler(SchemaController.AddTableToAllSchema));
 router.delete("/delete-table", ErrorHandler(SchemaController.DeleteTableToAllSchema));
 router.post("/add-column", ErrorHandler(SchemaController.AddColumnToAllSchemas));
 router.delete("/delete-column", ErrorHandler(SchemaController.DeleteColumnToAllSchemas));
+// router.get("/download-schema/:schema", ErrorHandler(SchemaController.ExportSchemaSQL));
 // ===== 404 FALLBACK =====
 router.all("*", (req, res) => { res.status(404).json({ status: false, message: "Path not found!" }); });
 export default router;

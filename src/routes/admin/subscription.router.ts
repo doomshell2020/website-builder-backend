@@ -13,7 +13,7 @@ router.get('/user-wise/:id', ErrorHandler(SubscriptionController.FindAllSubscrip
 router.post('/create', validate(schema.subscriptionJoiSchema) as any, ErrorHandler(SubscriptionController.CreateSubscription as any));
 router.patch('/status/:id', ErrorHandler(SubscriptionController.UpdateStatusSubscription as any));
 router.patch('/payment/:id', ErrorHandler(SubscriptionController.UpdatePaymentStatus as any));
-// router.put('/update/:id', validate(schema.updateSubscriptionJoi) as any, ErrorHandler(SubscriptionController.UpdateSubscription as any));
+router.put('/update/:id', validate(schema.subscriptionUpdateJoiSchema) as any, ErrorHandler(SubscriptionController.UpdateSubscription as any));
 router.delete('/delete/:id', ErrorHandler(SubscriptionController.DeleteSubscription as any));
 router.get('/search', ErrorHandler(SubscriptionController.SearchSubscription as any));
 router.get('/send/email/:id', ErrorHandler(SubscriptionController.SendEmail as any));

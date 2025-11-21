@@ -58,3 +58,92 @@ export const subscriptionJoiSchema = Joi.object({
     .custom((v) => toString(v)),
   email: Joi.string().optional(),
 }).options({ convert: true });
+
+
+export const subscriptionUpdateJoiSchema = Joi.object({
+  plan_id: Joi.alternatives(Joi.number(), Joi.string())
+    .optional()
+    .custom((v) => toString(v)),
+
+  c_id: Joi.alternatives(Joi.number(), Joi.string())
+    .optional()
+    .custom((v) => toString(v)),
+
+  created: Joi.alternatives(Joi.date(), Joi.string())
+    .optional()
+    .custom((v) => toString(v)),
+
+  expiry_date: Joi.alternatives(Joi.date(), Joi.string())
+    .optional()
+    .custom((v) => toString(v)),
+
+  status: Joi.string()
+    .valid("Y", "N", "D")
+    .optional(),
+
+  payment_id: Joi.string().allow(null, "").optional().custom(toString),
+
+  order_id: Joi.string().allow(null, "").optional().custom(toString),
+
+  signature_razorpay: Joi.string()
+    .allow(null, "")
+    .optional()
+    .custom(toString),
+
+  totaluser: Joi.alternatives(Joi.number(), Joi.string())
+    .optional()
+    .custom((v) => toString(v)),
+
+  plantotalprice: Joi.alternatives(Joi.number(), Joi.string())
+    .allow(null, "")
+    .optional()
+    .custom((v) => toString(v)),
+
+  taxprice: Joi.alternatives(Joi.number(), Joi.string())
+    .allow(null, "")
+    .optional()
+    .custom((v) => toString(v)),
+
+  discount: Joi.alternatives(Joi.number(), Joi.string())
+    .allow(null, "")
+    .optional()
+    .custom((v) => toString(v)),
+
+  payment_detail: Joi.string().optional(),
+
+  dropreason: Joi.string().allow(null, "").optional(),
+
+  isdrop: Joi.string()
+    .valid("Y", "N")
+    .optional(),
+
+  dropdate: Joi.alternatives(Joi.date(), Joi.string())
+    .allow(null)
+    .optional()
+    .custom((v) => (v ? toString(v) : null)),
+
+  payment_date: Joi.alternatives(Joi.date(), Joi.string())
+    .allow(null)
+    .optional()
+    .custom((v) => (v ? toString(v) : null)),
+
+  razorpay_order_id: Joi.string().allow(null, "").optional(),
+
+  cgst: Joi.alternatives(Joi.number(), Joi.string())
+    .optional()
+    .custom((v) => toString(v)),
+
+  sgst: Joi.alternatives(Joi.number(), Joi.string())
+    .optional()
+    .custom((v) => toString(v)),
+
+  igst: Joi.alternatives(Joi.number(), Joi.string())
+    .optional()
+    .custom((v) => toString(v)),
+
+  per_user_rate: Joi.alternatives(Joi.number(), Joi.string())
+    .optional()
+    .custom((v) => toString(v)),
+
+  email: Joi.string().optional(),
+}).options({ convert: true });

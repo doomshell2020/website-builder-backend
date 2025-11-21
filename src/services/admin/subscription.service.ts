@@ -14,7 +14,7 @@ export const findSubscriptionById = async (id: string) => {
         {
           model: User,
           as: "Customer",
-          attributes: ['id', 'name', 'email', 'mobile_no', 'company_logo', 'company_name'],
+          attributes: ['id', 'name', 'email', 'mobile_no', 'company_logo', 'company_name','address1','gst_type'],
         },
         {
           model: Plan,
@@ -321,28 +321,14 @@ export const findAllSubscriptionByUsers = async (id: string | number, page: numb
 
 export const updateSubscription = async (id: number, req: any) => {
   const { body } = req;
-  const { name } = body;
-
   try {
-    if (name) {
-      const alreadyExists = await Subscription.findOne({
-        where: { name: { [Op.iLike]: name }, id: { [Op.ne]: id } },
-      });
-      if (alreadyExists) {
-        throw new apiErrors.BadRequestError("Subscription with this name already exists.");
-      }
-    }
-
     const updateData = { ...body, updatedAt: new Date() };
-
     const [affectedCount, updatedRows] = await Subscription.update(updateData, {
       where: { id }, returning: true,
     });
 
     if (affectedCount === 0) { throw new apiErrors.BadRequestError("Subscription not found."); }
-
     return { status: true, message: "Subscription updated successfully.", result: updatedRows[0], };
-
   } catch (error) {
     console.error("Error while updating Subscription:", error);
     throw (error);
