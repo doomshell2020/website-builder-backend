@@ -14,7 +14,7 @@ export const findSubscriptionById = async (id: string) => {
         {
           model: User,
           as: "Customer",
-          attributes: ['id', 'name', 'email', 'mobile_no', 'company_logo', 'company_name','address1','gst_type'],
+          attributes: ['id', 'name', 'email', 'mobile_no', 'company_logo', 'company_name', 'address1', 'gst_type'],
         },
         {
           model: Plan,
@@ -105,7 +105,7 @@ export const createSubscription = async (req: any) => {
         <td align="center">
 
             <!-- OUTER CONTAINER -->
-            <table class="container" width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border:3px solid #dc3545; border-radius:4px;">
+            <table class="container" width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border:3px solid #619fd6; border-radius:4px;">
 
                 <!-- TOP CONTACT BAR -->
                 <tr>
@@ -114,13 +114,17 @@ export const createSubscription = async (req: any) => {
                             <tr>
                                 <td style="color:#000;">+91 8005523567</td>
                                 <td style="text-align:right;">
-                                    <a href="https://www.ezypayroll.in" style="color:#007bff; text-decoration:none;">www.ezypayroll.in</a>
+                                    <a href="https://www.doomshell.com/" style="color:#377fbf; text-decoration:none;">www.doomshell.com</a>
                                 </td>
                             </tr>
                             <tr>
-                                <td colspan="2" align="center" style="padding:15px 0;">
-                                    <img src="https://ezypayroll.in/frontEnd/images/logo.png" width="200" alt="logo" />
-                                </td>
+                                 <td colspan="2" align="center" style="padding:15px 0;">
+                                  <img 
+                                     src="https://www.doomshell.com/images/doomshell-logo-black.webp" 
+                                     alt="logo"
+                                     style="max-width:280px; width:100%; height:auto; object-fit:contain;"
+                                  />
+                             </td>
                             </tr>
                         </table>
                     </td>
@@ -131,20 +135,20 @@ export const createSubscription = async (req: any) => {
                     <td class="inner-box" style="padding:20px 30px;">
 
                         <!-- ORDER HEADING -->
-                        <h2 style="text-align:center; color:#e14d4d; margin:0;">Order Detail</h2>
-                        <h1 class="order-amount" style="text-align:center; color:#0077a1; margin:5px 0 20px; font-size:26px;">
+                        <h2 style="text-align:center; color:#377fbf; margin:0;">Order Detail</h2>
+                        <h1 class="order-amount" style="text-align:center; color:#000000; margin:5px 0 20px; font-size:26px;">
                             Rs. {{ORDER_TOTAL}}
                         </h1>
 
                         <!-- BLUE MAIN TABLE -->
-                        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; border:1px solid #0077a1;">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; border:1px solid #377fbf;">
                             
                             <!-- HEADER BLUE BAR -->
                             <tr>
-                                <th style="background:#0077a1; color:#fff; padding:10px; text-align:left; width:70%;">
+                                <th style="background:#377fbf; color:#fff; padding:10px; text-align:left; width:70%;">
                                     Description
                                 </th>
-                                <th style="background:#0077a1; color:#fff; padding:10px; text-align:right; width:30%;">
+                                <th style="background:#377fbf; color:#fff; padding:10px; text-align:right; width:30%;">
                                     Amount (In Rs.)
                                 </th>
                             </tr>
@@ -152,7 +156,7 @@ export const createSubscription = async (req: any) => {
                             <!-- MAIN ROW -->
                             <tr>
                                 <td style="padding:10px; border-bottom:1px solid #d9d9d9;">
-                                    <strong>EZYPayroll Software</strong><br>
+                                    <strong>Doomshell Software </strong><br>
                                     - Plan @ Rs. {{PLAN_RATE}}<br>
                                     - Billing Period: {{PLAN_START}} to {{PLAN_END}}
                                 </td>
@@ -163,7 +167,7 @@ export const createSubscription = async (req: any) => {
 
                             <!-- TAX + DISCOUNT ROW -->
                             <tr>
-                                <td style="padding:10px; color:#0077a1;">
+                                <td style="padding:10px; color:#377fbf;">
                                     Thank you for your Business!
                                 </td>
                                 <td style="padding:0;">
@@ -181,7 +185,7 @@ export const createSubscription = async (req: any) => {
                             </tr>
 
                             <!-- ORDER VALUE -->
-                            <tr style="background:#0077a1; color:#fff;">
+                            <tr style="background:#377fbf; color:#fff;">
                                 <td style="padding:10px; text-align:left; font-weight:bold;">
                                     Order Value
                                 </td>
@@ -195,7 +199,7 @@ export const createSubscription = async (req: any) => {
                         <!-- PAY NOW -->
                         <div style="text-align:center; padding:25px 0;">
                             <a href="{{PAY_URL}}" 
-                               style="background:#0077a1; color:#fff; padding:12px 30px; text-decoration:none; 
+                               style="background:#377fbf; color:#fff; padding:12px 30px; text-decoration:none; 
                                       font-weight:bold; border-radius:4px; display:inline-block;">
                                 PAY NOW
                             </a>
@@ -204,7 +208,7 @@ export const createSubscription = async (req: any) => {
                         <!-- FOOTER -->
                         <p style="text-align:center; font-size:14px; margin:0;">
                             Best Regards,<br>
-                            Customer Services Ezypayroll
+                            Customer Services Doomshell Software
                         </p>
 
                         <p style="text-align:center; font-size:12px; margin-top:15px; color:#555;">
@@ -221,8 +225,7 @@ export const createSubscription = async (req: any) => {
 </table>
 
 </body>
-</html>
-`
+</html>`
         .replace(/{{ORDER_TOTAL}}/g, formatPrice(plantotalprice))
         // .replace(/{{TOTAL_USER}}/g, totaluser)
         .replace(/{{PLAN_RATE}}/g, formatPrice(per_user_rate))
@@ -655,196 +658,477 @@ export const bulkInactiveExpiredSubscriptions = async () => {
   }
 };
 
-// invoice 
+// Invoice 
 {/* const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: #f4f4f7;
-      font-family: Arial, sans-serif;
-    }
-
-    .container {
-      width: 600px;
-      margin: 0 auto;
-      background: #ffffff;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-    }
-
-    .header {
-      padding: 15px;
-      background: #111827;
-      color: white;
-      font-size: 14px;
-    }
-
-    .header a {
-      color: #ffffff;
-      text-decoration: none;
-      font-weight: 500;
-    }
-
-    .logo {
-      text-align: center;
-      padding: 20px 0;
-    }
-
-    .content {
-      padding: 25px;
-      color: #333;
-      font-size: 14px;
-    }
-
-    .section-title {
-      font-weight: bold;
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-
-    th, td {
-      padding: 10px 5px;
-      font-size: 14px;
-    }
-
-    th {
-      text-align: left;
-      border-bottom: 1px solid #e5e7eb;
-    }
-
-    td:last-child {
-      text-align: right;
-    }
-
-    .total-box {
-      margin-top: 10px;
-      border-top: 1px solid #ddd;
-      padding-top: 10px;
-      font-weight: bold;
-    }
-
-    .btn {
-      display: block;
-      width: 100%;
-      text-align: center;
-      background: #2563eb;
-      color: white;
-      padding: 12px 0;
-      text-decoration: none;
-      font-size: 16px;
-      font-weight: bold;
-      border-radius: 6px;
-      margin-top: 25px;
-    }
-
-    .footer {
-      margin-top: 20px;
-      padding: 20px;
-      text-align: center;
-      font-size: 12px;
-      color: #6b7280;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <title>Doomshell Invoice</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </head>
 
-<body>
+<body style="font-family: Arial, sans-serif; margin:0; padding:0; background:#f0f4ff;">
 
-  <div class="container">
+    <p style="font-size:18px; font-weight:bold; color:#3A7BD5;">Document</p>
 
-    <!-- Header -->
-    <div class="header">
-      +91 8005523567
-      <span style="float:right;">
-        <a href="https://www.ezypayroll.in">www.ezypayroll.in</a>
-      </span>
-    </div>
+<table align="center" cellspacing="0px" cellpadding="0px" style="width:600px; border:1px solid #e6e6e6;">
+<thead>
+<tr>
+<td>
+<table align="center" cellspacing="0px" cellpadding="10px" style="width:100%; border-bottom:2px solid #3A7BD5;">
+<thead>
+<tr>
+<td style="color:#3A7BD5; font-weight:bold;">+91 8005523567</td>
+<td style="text-align:right; color:#3A7BD5; font-weight:bold;"> <a href="https://www.doomshell.com/" style="color:#377fbf; text-decoration:none;">www.doomshell.com</a></td>
+</tr>
 
-    <!-- Logo -->
-    <div class="logo">
-      <img src="https://ezypayroll.in/frontEnd/images/logo.png" width="180" alt="EZYPayroll Logo"/>
-    </div>
+<tr>
+<td colspan="2" style="text-align:center">
+    <img src="https://www.doomshell.com/images/doomshell-logo-black.webp" alt="logo" style="width:280px">
+</td>
+</tr>
 
-    <!-- Content -->
-    <div class="content">
+</thead>
+</table>
+</td>
+</tr>
+</thead>
 
-      <p class="section-title">Order Details</p>
-      <p style="font-size: 16px; font-weight: bold;">Rs. {ORDER_TOTAL}</p>
+<tbody>
+<tr><td><table align="center" cellspacing="0px" cellpadding="0" style="width:94%"><tbody><tr><td><br></td><td style="text-align:center"><br></td><td><br></td></tr></tbody></table></td></tr>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Description</th>
-            <th style="text-align:right;">Amount (₹)</th>
-          </tr>
-        </thead>
+<tr>
+<td>
+<table align="center" cellspacing="0px" cellpadding="20px" style="width:94%">
+<tbody>
 
-        <tbody>
-          <tr>
-            <td>
-              <p><strong>EZYPayroll Software</strong></p>
-              <p>- {TOTAL_USER} Users Plan @ Rs. {PLAN_RATE}</p>
-              <p>- Billing Period: {PLAN_START} to {PLAN_END}</p>
-            </td>
-            <td>{PLAN_TOTAL}</td>
-          </tr>
+<tr>
+<td>
+<p style="font-size:22px; margin-bottom:10px; font-weight:bold; color:#3A7BD5;">Invoice</p>
+<p style="margin:0;">Doomshell Softwares Private Limited</p>
+<p style="margin:0;">A-3 Mall Road, vidhyadhar Nagar, Jaipur-302039 India</p>
+</td>
+</tr>
 
-          <tr>
-            <td><strong>Tax</strong></td>
-            <td>{TAX}</td>
-          </tr>
+<tr>
+<td>
+<table cellspacing="0" cellpadding="5" style="width:100%; border:1px solid #e6e6e6; border-radius:5px;">
+<tbody>
+<tr><td colspan="2" style="font-weight:bold; color:#3A7BD5;">Billing to:</td></tr>
+<tr>
+<td style="font-size:14px; font-weight:bold;">{COMPANYNAME}</td>
+<td style="text-align:right; font-size:14px;">Invoice Date: <strong style="color:#3A7BD5;">{INVOICEDATE}</strong></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
 
-          <tr>
-            <td><strong>Discount</strong></td>
-            <td>{DISCOUNT}</td>
-          </tr>
+<tr>
+<td>
+<table cellspacing="0" cellpadding="10" style="width:100%; border-top:2px solid #3A7BD5;">
+<thead>
+<tr>
+<th style="text-align:left; color:#3A7BD5; font-size:16px;">Description</th>
+<th style="text-align:right; color:#3A7BD5; font-size:16px;">Amount (In Rs.)</th>
+</tr>
+</thead>
 
-          <tr class="total-box">
-            <td><strong>Order Value</strong></td>
-            <td><strong>{ORDER_TOTAL}</strong></td>
-          </tr>
-        </tbody>
-      </table>
+<tbody>
+<tr>
+<td>
+<p style="margin:0;">Doomshell Softwares</p>
+<p style="margin:0; font-size:13px;">- Plan @ Rs. {PLANRATE}</p>
+<p style="margin:0; font-size:13px;">- Billing Period: {PLANSTART} to {PLANEND}</p>
+</td>
+<td style="text-align:right; font-weight:bold;">{PLANTOTAL}</td>
+</tr>
+</tbody>
 
-      <!-- Pay Now Button -->
-      <a href="{PAY_URL}" class="btn">PAY NOW</a>
+<tbody>
+<tr>
+<td style="font-weight:bold; color:#3A7BD5;">Thank you for your Business!</td>
+<td style="text-align:right;">
+<table cellspacing="0" cellpadding="5" style="width:100%">
+<tbody>
+<tr><td style="text-align:left">CGST(9%)</td><td style="text-align:right">{CGST}</td></tr>
+<tr><td style="text-align:left">SGST(9%)</td><td style="text-align:right">{SGST}</td></tr>
+<tr><td style="text-align:left">IGST(18%)</td><td style="text-align:right">{IGST}</td></tr>
+<tr><td style="text-align:left">Total Tax(18%)</td><td style="text-align:right; font-weight:bold;">{TAX}</td></tr>
+<tr><td style="text-align:left">Discount</td><td style="text-align:right">{DISCOUNT}</td></tr>
+</tbody>
+</table>
+</td>
+</tr>
 
-      <p style="margin-top:20px; font-size:14px;">
-        Thank you for your business!
-      </p>
+<tr>
+<td style="text-align:right"><br></td>
+<td style="text-align:right">
+<table cellspacing="0" cellpadding="5" style="width:100%; border-top:2px solid #3A7BD5;">
+<tbody>
+<tr>
+<td style="text-align:left; font-size:16px; font-weight:bold; color:#3A7BD5;">Order Value</td>
+<td style="text-align:right; font-size:16px; font-weight:bold; color:#3A7BD5;">{ORDERTOTAL}</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
 
-    </div>
+</tbody>
+</table>
+</td>
+</tr>
 
-    <!-- Footer -->
-    <div class="footer">
-      Best Regards,<br>
-      Customer Services – Ezypayroll<br><br>
-      © 2021 Doomshell Software Pvt. Ltd | All Rights Reserved
-    </div>
+<tr>
+<td style="padding-top:20px;">
+<span style="color:#3A7BD5; font-weight:bold;">Best Regards,</span><br>
+Customer Services Doomshell Software<br><br>
+<span style="font-size:12px; color:#555;">Copyrights © 2021 Doomshell Software Pvt. Ltd | All Rights Reserved</span>
+</td>
+</tr>
 
-  </div>
+</tbody>
+</table>
+</td></tr>
+</tbody>
+
+<tfoot>
+<tr>
+<td>
+<table align="center" cellspacing="0px" cellpadding="0" style="width:94%">
+<tbody><tr><td><br></td><td><br></td><td><br></td></tr></tbody>
+</table>
+</td>
+</tr>
+</tfoot>
+
+</table>
+
+
+<script>
+document.getElementById("year").innerText = new Date().getFullYear();
+</script>
 
 </body>
-</html>` 
-  .replaceAll('{ORDER_TOTAL}', orderTotal)
-  .replaceAll('{TOTAL_USER}', totalUser)
-  .replaceAll('{PLAN_RATE}', planRate)
-  .replaceAll('{PLAN_START}', planStart)
-  .replaceAll('{PLAN_END}', planEnd)
-  .replaceAll('{PLAN_TOTAL}', planTotal)
-  .replaceAll('{TAX}', tax)
-  .replaceAll('{DISCOUNT}', discount)
-  .replaceAll('{PAY_URL}', payUrl);
+</html>
+` 
+           .replaceAll("{COMPANYNAME}", data.COMPANYNAME)
+           .replaceAll("{INVOICEDATE}", data.INVOICEDATE)
+           .replaceAll("{PLANRATE}", data.PLANRATE)
+           .replaceAll("{PLANSTART}", data.PLANSTART)
+           .replaceAll("{PLANEND}", data.PLANEND)
+           .replaceAll("{PLANTOTAL}", data.PLANTOTAL)
+           .replaceAll("{TOTALUSER}", data.TOTALUSER)
+           .replaceAll("{CGST}", data.CGST)
+           .replaceAll("{SGST}", data.SGST)
+           .replaceAll("{IGST}", data.IGST)
+           .replaceAll("{TAX}", data.TAX)
+           .replaceAll("{DISCOUNT}", data.DISCOUNT)
+           .replaceAll("{ORDERTOTAL}", data.ORDERTOTAL);
+ */}
+
+
+// Demo request email template
+{/**
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Doomshell Demo Request</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+<body style="margin:0; padding:0; background-color:#f0f4ff; font-family: Arial, sans-serif;">
+
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f0f4ff; padding:30px 0;">
+        <tr>
+            <td align="center">
+
+                <!-- Card -->
+                <table width="600" cellpadding="0" cellspacing="0" border="0" 
+                       style="background:#ffffff; border-radius:10px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+
+                    <!-- Header -->
+                    <tr>
+                        <td align="center" style="background:#3A7BD5; padding:25px;">
+                            <img src="https://doomshellsoftwares.com/wp-content/uploads/2023/06/logo.png" 
+                                 alt="Doomshell Software" style="max-width:220px; height:auto;">
+                        </td>
+                    </tr>
+
+                    <!-- Title -->
+                    <tr>
+                        <td style="text-align:center; padding:20px;">
+                            <h2 style="margin:0; font-size:22px; color:#3A7BD5;">
+                                New Demo Request Received
+                            </h2>
+                        </td>
+                    </tr>
+
+                    <!-- Body -->
+                    <tr>
+                        <td style="padding:0 30px 25px 30px; font-size:15px; line-height:1.6; color:#333;">
+                            
+                            <p>Hi <strong>Admin</strong>,</p>
+
+                            <p style="margin-bottom:18px;">
+                                A new demo request has been submitted. Below are the details:
+                            </p>
+
+                            <table cellpadding="0" cellspacing="0" width="100%" 
+                                   style="background:#f8f9ff; padding:15px; border-radius:6px; border-left:4px solid #3A7BD5;">
+                                <tr><td><strong>Name:</strong> {name}</td></tr>
+                                <tr><td><strong>Company Name:</strong> {company}</td></tr>
+                                <tr><td><strong>Title:</strong> {title}</td></tr>
+                                <tr><td><strong>Email:</strong> {email}</td></tr>
+                                <tr><td><strong>Phone No.:</strong> {phone}</td></tr>
+                                <tr><td><strong>Day:</strong> {day}</td></tr>
+                                <tr><td><strong>Time:</strong> {time}</td></tr>
+                            </table>
+
+                            <p style="margin-top:25px;">
+                                Thank you for reaching out — our team will get back to you shortly!
+                            </p>
+
+                            <p style="margin-top:15px;">
+                                Regards,<br>
+                                <strong>Doomshell Software Pvt. Ltd.</strong>
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td align="center" style="background:#3A7BD5; padding:15px; color:#ffffff; font-size:13px;">
+                            Doomshell Software Pvt. Ltd. |
+                            <a href="https://doomshellsoftwares.com" style="color:#ffffff; text-decoration:none;">doomshellsoftwares.com</a> |
+                            © {year}. All Rights Reserved.
+                        </td>
+                    </tr>
+
+                </table>
+                <!-- End Card -->
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>`
+.replace(/{name}/g, data.name)
+    .replace(/{email}/g, data.email)
+    .replace(/{phone}/g, data.phone)
+    .replace(/{day}/g, data.day)
+    .replace(/{time}/g, data.time)
+    .replace(/{year}/g, new Date().getFullYear());
+ */}
+
+
+// Welcome template
+{/** 
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Welcome to Doomshell</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+
+<body style="margin:0; padding:0; background:#f4f7ff; font-family:Arial, sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="padding:20px 0;">
+<tr>
+<td align="center">
+
+<table width="600" cellpadding="0" cellspacing="0" style="background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.12);">
+
+<!-- Header -->
+<tr>
+<td align="center" style="background:#fff; padding:25px;">
+    <img src="https://www.doomshell.com/images/doomshell-logo-black.webp" alt="logo" style="max-width:290px;">
+</td>
+</tr>
+
+<!-- Title -->
+<tr>
+<td style="padding:25px; text-align:center;">
+    <h2 style="margin:0; font-size:22px; color:#3A7BD5;">
+        Welcome, {USERNAME}! 🎉
+    </h2>
+    <p style="color:#555; font-size:14px; margin-top:8px;">
+        Your account has been successfully created with Doomshell Software.
+    </p>
+</td>
+</tr>
+
+<!-- Body -->
+<tr>
+<td style="padding:20px;">
+    <p style="font-size:15px; color:#333;">Hi <strong>{USERNAME}</strong>,</p>
+
+    <p style="font-size:14px; color:#555; line-height:1.6;">
+        We're excited to have you onboard! Your account is now ready.
+        Use the login details below to access your dashboard and explore our features.
+    </p>
+
+    <!-- Credentials -->
+    <table width="100%" cellpadding="12" cellspacing="0" style="background:#f8f9ff; border-left:4px solid #3A7BD5; margin:15px 0;">
+        <tr><td><strong>Email:</strong> {EMAIL}</td></tr>
+        <tr><td><strong>Password:</strong> {PASSWORD}</td></tr>
+    </table>
+
+    <p style="font-size:14px; color:#555; margin-top:20px;">
+        Click the button below to log in:
+    </p>
+
+    <!-- CTA Button -->
+    <p style="text-align:center; margin-top:20px;">
+        <a href="{LOGINURL}" style="background:#3A7BD5; color:#fff; padding:14px 26px; border-radius:6px; font-size:15px; text-decoration:none;">
+            Login to Dashboard
+        </a>
+    </p>
+
+    <p style="font-size:14px; color:#444; margin-top:25px;">
+        You can purchase a plan anytime by contacting the admin from your dashboard to unlock full access.
+    </p>
+</td>
+</tr>
+
+<!-- Footer -->
+<tr>
+<td style="padding:20px; text-align:center; font-size:13px; color:#666;">
+    Need help? Just reply to this email — we’re here to support you. 💙<br><br>
+    © {YEAR} Doomshell Software Pvt. Ltd. | All Rights Reserved
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>
+`
+           .replaceAll("{USERNAME}", user.name)
+           .replaceAll("{EMAIL}", user.email)
+           .replaceAll("{PASSWORD}", password)
+           .replaceAll("{LOGINURL}", loginUrl)
+           .replaceAll("{YEAR}", new Date().getFullYear());
+*/}
+
+
+// Welcome template when user register & have active plan
+{/**
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Welcome to Doomshell</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+
+<body style="margin:0; padding:0; background:#f4f7ff; font-family:Arial, sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="padding:20px 0;">
+<tr>
+<td align="center">
+
+<table width="600" cellpadding="0" cellspacing="0" style="background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.12);">
+
+<!-- Header -->
+<tr>
+<td align="center" style="background:#fff; padding:25px;">
+    <img src="https://www.doomshell.com/images/doomshell-logo-black.webp" alt="logo" style="max-width:290px;">
+</td>
+</tr>
+
+<!-- Title -->
+<tr>
+<td style="padding:25px; text-align:center;">
+    <h2 style="margin:0; font-size:22px; color:#3A7BD5;">
+        Welcome, {USERNAME}! 🎉
+    </h2>
+    <p style="color:#555; font-size:14px; margin-top:8px;">
+        Your account has been successfully created with Doomshell Software.
+    </p>
+</td>
+</tr>
+
+<!-- Body -->
+<tr>
+<td style="padding:20px;">
+    <p style="font-size:15px; color:#333;">Hi <strong>{USERNAME}</strong>,</p>
+
+    <p style="font-size:14px; color:#555; line-height:1.6;">
+        Thank you for registering with us! Your Doomshell dashboard is now active and ready to use.
+        Below are your login details:
+    </p>
+
+    <!-- Credentials Box -->
+    <table width="100%" cellpadding="12" cellspacing="0" style="background:#f8f9ff; border-left:4px solid #3A7BD5; margin:15px 0;">
+        <tr><td><strong>Email:</strong> {EMAIL}</td></tr>
+        <tr><td><strong>Password:</strong> {PASSWORD}</td></tr>
+    </table>
+
+    <!-- Optional plan info (only if purchased) -->
+    <p style="font-size:14px; margin-top:12px; color:#333; font-weight:bold;">
+        ✔ Your Plan Details:
+    </p>
+
+    <table width="100%" cellpadding="10" cellspacing="0" style="border:1px solid #e6e6e6; border-radius:6px; margin:10px 0;">
+        <tr>
+            <td><strong>Plan:</strong></td><td style="text-align:right;">{PLANNAME}</td>
+        </tr>
+        <tr>
+            <td><strong>Users Allowed:</strong></td><td style="text-align:right;">{TOTALUSER}</td>
+        </tr>
+        <tr>
+            <td><strong>Billing Period:</strong></td><td style="text-align:right;">{PLANSTART} → {PLANEND}</td>
+        </tr>
+        <tr>
+            <td><strong>Amount Paid:</strong></td><td style="text-align:right;">₹{PLANTOTAL}</td>
+        </tr>
+    </table>
+
+    <p style="font-size:14px; color:#555; margin-top:20px;">
+        You can now log in using the following button:
+    </p>
+
+    <!-- CTA Button -->
+    <p style="text-align:center; margin-top:20px;">
+        <a href="{LOGINURL}" style="background:#3A7BD5; color:#fff; padding:14px 28px; border-radius:6px; font-size:15px; text-decoration:none;">
+            Login to Dashboard
+        </a>
+    </p>
+</td>
+</tr>
+
+<!-- Footer -->
+<tr>
+<td style="padding:20px; text-align:center; font-size:13px; color:#666;">
+    If you need help, reply to this email — We're here for you 💙<br><br>
+    © {YEAR} Doomshell Software Pvt. Ltd. | All Rights Reserved
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>`
+           .replaceAll("{USERNAME}", user.name)
+           .replaceAll("{EMAIL}", user.email)
+           .replaceAll("{PASSWORD}", generatedPassword)
+           .replaceAll("{PLANNAME}", plan.name)
+           .replaceAll("{TOTALUSER}", plan.userLimit)
+           .replaceAll("{PLANSTART}", plan.start)
+           .replaceAll("{PLANEND}", plan.end)
+           .replaceAll("{PLANTOTAL}", plan.amount)
+           .replaceAll("{LOGINURL}", loginUrl)
+           .replaceAll("{YEAR}", new Date().getFullYear());
  */}
