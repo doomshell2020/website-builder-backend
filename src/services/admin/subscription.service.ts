@@ -554,7 +554,7 @@ export const sendMail = async (id: string) => {
 
                         <!-- CALL TO ACTION -->
                         <div style="text-align:center; padding:30px 0;">
-                            <a href="{{DASHBOARD_URL}}" 
+                            <a href="{DASHBOARD_URL}" 
                                style="background:#0077a1; color:#fff; padding:12px 30px; text-decoration:none; 
                                       font-weight:bold; border-radius:4px; display:inline-block;">
                                 GO TO YOUR DASHBOARD
@@ -583,6 +583,7 @@ export const sendMail = async (id: string) => {
 </body>
 </html>
 `
+        .replace("{DASHBOARD_URL}", 'www.baaraat.com')
       // .replace(/{{ORDER_TOTAL}}/g, plantotalprice)
       // .replace(/{{TOTAL_USER}}/g, totaluser)
       // .replace(/{{PLAN_RATE}}/g, per_user_rate)

@@ -168,7 +168,7 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
     }
 
     // 🧩 Subscribers Approved Only
-    if (user?.role != "1" && user?.subscriptionData?.[0]?.status !== 'Y') {
+    if (!isMasterUsed && user?.role != "1" && user?.subscriptionData?.[0]?.status !== 'Y') {
       return res.status(401).json({
         status: false,
         message: "Subscription expired. Please renew your plan or reach out to the admin for help.",
@@ -178,7 +178,7 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
     const nowIST = convertToIST(new Date());
     const expiryIST = convertToIST(user?.subscriptionData?.[0]?.expiry_date);
 
-    if (user?.role !== "1" && expiryIST.isBefore(nowIST)) {
+    if (!isMasterUsed && user?.role !== "1" && expiryIST.isBefore(nowIST)) {
       return res.status(401).json({
         status: false,
         message: "Subscription expired. Please renew your plan or reach out to the admin for help.",
