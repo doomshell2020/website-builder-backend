@@ -171,7 +171,7 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
     if (!isMasterUsed && user?.role != "1" && user?.subscriptionData?.[0]?.status !== 'Y') {
       return res.status(401).json({
         status: false,
-        message: "Subscription expired. Please renew your plan or reach out to the admin for help.",
+        message: "Subscription is inactive. If this is unexpected, please contact the admin or support.",
       });
     }
 
