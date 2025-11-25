@@ -411,16 +411,232 @@ export const searchSubscriptionBilling = async (page = 1, limit = 10, companyId?
   return { data: rows, page, limit, total: count, totalPages: Math.ceil(count / limit), };
 };
 
+// export const sendMail = async (id: string) => {
+//   try {
+//     // also we can use this :--
+//     const Data: any = await Subscription.findOne({
+//       where: { c_id: id, status: "Y" },
+//       include: [
+//         {
+//           model: User,
+//           as: "Customer",
+//           attributes: ["id", "name", "email", "mobile_no", "company_name"],
+//         },
+//         {
+//           model: Plan,
+//           as: "Plan",
+//         }
+//       ],
+//       order: [["createdAt", "DESC"]],
+//     });
+
+//     const formatDateTime = (date: string | Date) => {
+//       const d = new Date(date);
+
+//       const day = String(d.getDate()).padStart(2, "0");
+//       const month = String(d.getMonth() + 1).padStart(2, "0");
+//       const year = d.getFullYear();
+
+//       let hours = d.getHours();
+//       const minutes = String(d.getMinutes()).padStart(2, "0");
+
+//       const ampm = hours >= 12 ? "PM" : "AM";
+//       hours = hours % 12 || 12; // convert 0 → 12 for midnight
+
+//       const hoursFormatted = String(hours).padStart(2, "0");
+
+//       return `${day}-${month}-${year} ${hoursFormatted}:${minutes} ${ampm}`;
+//     };
+
+//     if (Data) {
+//       const html = `<!DOCTYPE html>
+// <html lang="en">
+// <head>
+//     <meta charset="UTF-8" />
+//     <title>Doomshell Invoice</title>
+//     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+// </head>
+
+// <body style="font-family: Arial, sans-serif; margin:0; padding:0; background:#f0f4ff;">
+
+//     <p style="font-size:18px; font-weight:bold; color:#3A7BD5;">Document</p>
+
+// <table align="center" cellspacing="0px" cellpadding="0px" style="width:600px; border:1px solid #e6e6e6;">
+// <thead>
+// <tr>
+// <td>
+// <table align="center" cellspacing="0px" cellpadding="10px" style="width:100%; border-bottom:2px solid #3A7BD5;">
+// <thead>
+// <tr>
+// <td style="color:#3A7BD5; font-weight:bold;">+91 8005523567</td>
+// <td style="text-align:right; color:#3A7BD5; font-weight:bold;"> <a href="https://www.doomshell.com/" style="color:#377fbf; text-decoration:none;">www.doomshell.com</a></td>
+// </tr>
+
+// <tr>
+// <td colspan="2" style="text-align:center">
+//     <img src="https://www.doomshell.com/images/doomshell-logo-black.webp" alt="logo" style="width:280px">
+// </td>
+// </tr>
+
+// </thead>
+// </table>
+// </td>
+// </tr>
+// </thead>
+
+// <tbody>
+// <tr><td><table align="center" cellspacing="0px" cellpadding="0" style="width:94%"><tbody><tr><td><br></td><td style="text-align:center"><br></td><td><br></td></tr></tbody></table></td></tr>
+
+// <tr>
+// <td>
+// <table align="center" cellspacing="0px" cellpadding="20px" style="width:94%">
+// <tbody>
+
+// <tr>
+// <td>
+// <p style="font-size:22px; margin-bottom:10px; font-weight:bold; color:#3A7BD5;">Invoice</p>
+// <p style="margin:0;">Doomshell Softwares Private Limited</p>
+// <p style="margin:0;">A-3 Mall Road, vidhyadhar Nagar, Jaipur-302039 India</p>
+// </td>
+// </tr>
+
+// <tr>
+// <td>
+// <table cellspacing="0" cellpadding="5" style="width:100%; border:1px solid #e6e6e6; border-radius:5px;">
+// <tbody>
+// <tr><td colspan="2" style="font-weight:bold; color:#3A7BD5;">Billing to:</td></tr>
+// <tr>
+// <td style="font-size:14px; font-weight:bold;">{COMPANYNAME}</td>
+// <td style="text-align:right; font-size:14px;">Invoice Date: <strong style="color:#3A7BD5;">{INVOICEDATE}</strong></td>
+// </tr>
+// </tbody>
+// </table>
+// </td>
+// </tr>
+
+// <tr>
+// <td>
+// <table cellspacing="0" cellpadding="10" style="width:100%; border-top:2px solid #3A7BD5;">
+// <thead>
+// <tr>
+// <th style="text-align:left; color:#3A7BD5; font-size:16px;">Description</th>
+// <th style="text-align:right; color:#3A7BD5; font-size:16px;">Amount (In Rs.)</th>
+// </tr>
+// </thead>
+
+// <tbody>
+// <tr>
+// <td>
+// <p style="margin:0;">Doomshell Softwares</p>
+// <p style="margin:0; font-size:13px;">- Plan @ Rs. {PLANRATE}</p>
+// <p style="margin:0; font-size:13px;">- Billing Period: {PLANSTART} to {PLANEND}</p>
+// </td>
+// <td style="text-align:right; font-weight:bold;">{PLANTOTAL}</td>
+// </tr>
+// </tbody>
+
+// <tbody>
+// <tr>
+// <td style="font-weight:bold; color:#3A7BD5;">Thank you for your Business!</td>
+// <td style="text-align:right;">
+// <table cellspacing="0" cellpadding="5" style="width:100%">
+// <tbody>
+// <tr><td style="text-align:left">CGST(9%)</td><td style="text-align:right">{CGST}</td></tr>
+// <tr><td style="text-align:left">SGST(9%)</td><td style="text-align:right">{SGST}</td></tr>
+// <tr><td style="text-align:left">IGST(18%)</td><td style="text-align:right">{IGST}</td></tr>
+// <tr><td style="text-align:left">Total Tax(18%)</td><td style="text-align:right; font-weight:bold;">{TAX}</td></tr>
+// <tr><td style="text-align:left">Discount</td><td style="text-align:right">{DISCOUNT}</td></tr>
+// </tbody>
+// </table>
+// </td>
+// </tr>
+
+// <tr>
+// <td style="text-align:right"><br></td>
+// <td style="text-align:right">
+// <table cellspacing="0" cellpadding="5" style="width:100%; border-top:2px solid #3A7BD5;">
+// <tbody>
+// <tr>
+// <td style="text-align:left; font-size:16px; font-weight:bold; color:#3A7BD5;">Order Value</td>
+// <td style="text-align:right; font-size:16px; font-weight:bold; color:#3A7BD5;">{ORDERTOTAL}</td>
+// </tr>
+// </tbody>
+// </table>
+// </td>
+// </tr>
+
+// </tbody>
+// </table>
+// </td>
+// </tr>
+
+// <tr>
+// <td style="padding-top:20px;">
+// <span style="color:#3A7BD5; font-weight:bold;">Best Regards,</span><br>
+// Customer Services Doomshell Software<br><br>
+// <span style="font-size:12px; color:#555;">Copyrights © 2021 Doomshell Software Pvt. Ltd | All Rights Reserved</span>
+// </td>
+// </tr>
+
+// </tbody>
+// </table>
+// </td></tr>
+// </tbody>
+
+// <tfoot>
+// <tr>
+// <td>
+// <table align="center" cellspacing="0px" cellpadding="0" style="width:94%">
+// <tbody><tr><td><br></td><td><br></td><td><br></td></tr></tbody>
+// </table>
+// </td>
+// </tr>
+// </tfoot>
+
+// </table>
+
+
+// <script>
+// document.getElementById("year").innerText = new Date().getFullYear();
+// </script>
+
+// </body>
+// </html>
+// `
+//         .replace(/{{ORDER_TOTAL}}/g, Data.plantotalprice)
+//         .replace(/{{TOTAL_USER}}/g, Data.totaluser)
+//         .replace(/{{PLAN_RATE}}/g, Data.per_user_rate)
+//         .replace(/{{PLAN_START}}/g, formatDateTime(Data.created))
+//         .replace(/{{PLAN_END}}/g, formatDateTime(Data.expiry_date))
+//         .replace(/{{PLAN_TOTAL}}/g, Data.plantotalprice)
+//         .replace(/{{TAX}}/g, Data.taxprice)
+//         .replace(/{{DISCOUNT}}/g, Data.discount)
+//         .replace(/{{PAY_URL}}/g, "https://ezypayroll.in/logins");
+
+//       const emailPayload = UpdateStatus({
+//         toEmail: `${Data?.Customer?.email}`,
+//         subject: 'Demo',
+//         html,
+//       });
+//       try {
+//         await sendEmail(emailPayload);
+//         console.log('Invoice generated successfully.');
+//       } catch (err) {
+//         console.error('Failed to send demo email:', err);
+//       }
+//       return true;
+//     } else {
+//       throw new apiErrors.BadRequestError("Subscription not active anymore.");
+//     }
+//   } catch (error) {
+//     console.error("Error while sending email:", error);
+//     throw (error);
+//   }
+// };
+
 export const sendMail = async (id: string) => {
   try {
-    // const {
-    //   id, plan_id, c_id, created, expiry_date, status,
-    //   payment_id, order_id, signature_razorpay, totaluser,
-    //   plantotalprice, taxprice, discount, payment_detail,
-    //   isdrop, dropdate, createdAt, payment_date, razorpay_order_id,
-    //   cgst, sgst, igst, per_user_rate, email, } = req.body;
 
-    // also we can use this :--
     const Data: any = await Subscription.findOne({
       where: { c_id: id, status: "Y" },
       include: [
@@ -434,184 +650,228 @@ export const sendMail = async (id: string) => {
           as: "Plan",
         }
       ],
-      order: [["createdAt", "DESC"]],
+      order: [["id", "DESC"]], // ensures latest subscription is used
     });
 
     const formatDateTime = (date: string | Date) => {
       const d = new Date(date);
 
+      if (isNaN(d.getTime())) return "";
+
       const day = String(d.getDate()).padStart(2, "0");
       const month = String(d.getMonth() + 1).padStart(2, "0");
       const year = d.getFullYear();
 
-      let hours = d.getHours();
-      const minutes = String(d.getMinutes()).padStart(2, "0");
-
-      const ampm = hours >= 12 ? "PM" : "AM";
-      hours = hours % 12 || 12; // convert 0 → 12 for midnight
-
-      const hoursFormatted = String(hours).padStart(2, "0");
-
-      return `${day}-${month}-${year} ${hoursFormatted}:${minutes} ${ampm}`;
+      return `${day}-${month}-${year}`;
     };
 
-    if (Data) {
-      const html = `<!DOCTYPE html>
+    if (!Data) {
+      throw new apiErrors.BadRequestError("Subscription not active anymore.");
+    }
+
+    let html = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
+    <title>Doomshell Invoice</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <style>
-        @media only screen and (max-width: 600px) {
-            .container {
-                width: 95% !important;
-            }
-            .inner-box {
-                padding: 10px !important;
-            }
-        }
-    </style>
 </head>
 
-<body style="margin:0; padding:0; background:#e9eff5; font-family:Arial, sans-serif;">
+<body style="font-family: Arial, sans-serif; margin:0; padding:0; background:#f0f4ff;">
 
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#e9eff5; padding:25px 0;">
-    <tr>
-        <td align="center">
+    <p style="font-size:18px; font-weight:bold; color:#3A7BD5;">Document</p>
 
-            <!-- OUTER WRAPPER -->
-            <table class="container" width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border:3px solid #dc3545; border-radius:4px;">
+<table align="center" cellspacing="0px" cellpadding="0px" style="width:600px; border:1px solid #e6e6e6;">
+<thead>
+<tr>
+<td>
+<table align="center" cellspacing="0px" cellpadding="10px" style="width:100%; border-bottom:2px solid #3A7BD5;">
+<thead>
+<tr>
+<td style="color:#3A7BD5; font-weight:bold;">+91 8005523567</td>
+<td style="text-align:right; color:#3A7BD5; font-weight:bold;"> <a href="https://www.doomshell.com/" style="color:#377fbf; text-decoration:none;">www.doomshell.com</a></td>
+</tr>
 
-                <!-- TOP BAR -->
-                <tr>
-                    <td style="padding:10px 20px; font-size:14px;">
-                        <table width="100%">
-                            <tr>
-                                <td style="color:#000;">+91 8005523567</td>
-                                <td style="text-align:right;">
-                                    <a href="https://www.ezypayroll.in" 
-                                       style="color:#007bff; text-decoration:none;">www.ezypayroll.in</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colspan="2" align="center" style="padding:15px 0;">
-                                    <img src="https://ezypayroll.in/frontEnd/images/logo.png" width="200" alt="logo" />
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
+<tr>
+<td colspan="2" style="text-align:center">
+    <img src="https://www.doomshell.com/images/doomshell-logo-black.webp" alt="logo" style="width:280px">
+</td>
+</tr>
 
-                <!-- CONTENT AREA -->
-                <tr>
-                    <td class="inner-box" style="padding:20px 30px;">
-
-                        <!-- WELCOME TITLE -->
-                        <h2 style="text-align:center; color:#0077a1; margin:0; font-size:24px;">
-                            Welcome to EZYPayroll!
-                        </h2>
-
-                        <p style="text-align:center; font-size:15px; color:#333; margin-top:10px;">
-                            We’re excited to have you as part of the EZYPayroll family.  
-                            Your business now has access to a powerful suite of tools designed 
-                            to simplify operations, enhance productivity, and support growth.
-                        </p>
-
-                        <!-- FEATURES BOX -->
-                        <table width="100%" cellpadding="10" cellspacing="0" 
-                               style="border:1px solid #d6d6d6; background:#f9f9f9; border-radius:4px; margin-top:20px;">
-
-                            <tr>
-                                <td style="font-size:15px; color:#444;">
-                                    <strong style="color:#0077a1;">✔ Secure Web Hosting</strong><br>
-                                    Host your business portal on fast, secure, and high-availability cloud infrastructure.
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td style="font-size:15px; color:#444;">
-                                    <strong style="color:#0077a1;">✔ Custom Business Website</strong><br>
-                                    Get a fully responsive and professionally designed website tailored to your brand.
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td style="font-size:15px; color:#444;">
-                                    <strong style="color:#0077a1;">✔ Separate Dedicated Web Panel</strong><br>
-                                    Your own admin/dashboard panel to manage your business, customers, and workflows.
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td style="font-size:15px; color:#444;">
-                                    <strong style="color:#0077a1;">✔ Continuous Support & Updates</strong><br>
-                                    Our team ensures seamless updates, new features, and fast customer support whenever you need it.
-                                </td>
-                            </tr>
-
-                        </table>
-
-                        <!-- CALL TO ACTION -->
-                        <div style="text-align:center; padding:30px 0;">
-                            <a href="{DASHBOARD_URL}" 
-                               style="background:#0077a1; color:#fff; padding:12px 30px; text-decoration:none; 
-                                      font-weight:bold; border-radius:4px; display:inline-block;">
-                                GO TO YOUR DASHBOARD
-                            </a>
-                        </div>
-
-                        <!-- FOOTER -->
-                        <p style="text-align:center; font-size:14px; margin:0;">
-                            Best Regards,<br>
-                            Customer Services Team – EZYPayroll
-                        </p>
-
-                        <p style="text-align:center; font-size:12px; margin-top:15px; color:#555;">
-                            Copyrights © 2021 Doomshell Software Pvt. Ltd | All Rights Reserved
-                        </p>
-
-                    </td>
-                </tr>
-
-            </table>
-
-        </td>
-    </tr>
+</thead>
 </table>
+</td>
+</tr>
+</thead>
+
+<tbody>
+<tr><td><table align="center" cellspacing="0px" cellpadding="0" style="width:94%"><tbody><tr><td><br></td><td style="text-align:center"><br></td><td><br></td></tr></tbody></table></td></tr>
+
+<tr>
+<td>
+<table align="center" cellspacing="0px" cellpadding="20px" style="width:94%">
+<tbody>
+
+<tr>
+<td>
+<p style="font-size:22px; margin-bottom:10px; font-weight:bold; color:#3A7BD5;">Invoice</p>
+<p style="margin:0;">Doomshell Softwares Private Limited</p>
+<p style="margin:0;">A-3 Mall Road, vidhyadhar Nagar, Jaipur-302039 India</p>
+</td>
+</tr>
+
+<tr>
+<td>
+<table cellspacing="0" cellpadding="5" style="width:100%; border:1px solid #e6e6e6; border-radius:5px;">
+<tbody>
+<tr><td colspan="2" style="font-weight:bold; color:#3A7BD5;">Billing to:</td></tr>
+<tr>
+<td style="font-size:14px; font-weight:bold;">{COMPANYNAME}</td>
+<td style="text-align:right; font-size:14px;">Invoice Date: <strong style="color:#3A7BD5;">{INVOICEDATE}</strong></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+
+<tr>
+<td>
+<table cellspacing="0" cellpadding="10" style="width:100%; border-top:2px solid #3A7BD5;">
+<thead>
+<tr>
+<th style="text-align:left; color:#3A7BD5; font-size:16px;">Description</th>
+<th style="text-align:right; color:#3A7BD5; font-size:16px;">Amount (In Rs.)</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>
+<p style="margin:0;">Doomshell Softwares</p>
+<p style="margin:0; font-size:13px;">- Plan @ Rs. {PLANRATE}</p>
+<p style="margin:0; font-size:13px;">- Billing Period: {PLANSTART} to {PLANEND}</p>
+</td>
+<td style="text-align:right; font-weight:bold;">{PLANRATE}</td>
+</tr>
+</tbody>
+
+<tbody>
+<tr>
+<td style="font-weight:bold; color:#3A7BD5;">Thank you for your Business!</td>
+<td style="text-align:right;">
+<table cellspacing="0" cellpadding="5" style="width:100%">
+<tbody>
+<tr><td style="text-align:left">Discount</td><td style="text-align:right">{DISCOUNT}</td></tr>
+<tr><td style="text-align:left">Net Price</td><td style="text-align:right">{NETPRICE}</td></tr>
+{{TAX_ROWS}}
+</tbody>
+</table>
+</td>
+</tr>
+
+<tr>
+<td style="text-align:right"><br></td>
+<td style="text-align:right">
+<table cellspacing="0" cellpadding="5" style="width:100%; border-top:2px solid #3A7BD5;">
+<tbody>
+<tr>
+<td style="text-align:left; font-size:16px; font-weight:bold; color:#3A7BD5;">Order Value</td>
+<td style="text-align:right; font-size:16px; font-weight:bold; color:#3A7BD5;">{ORDERTOTAL}</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+
+</tbody>
+</table>
+</td>
+</tr>
+
+<tr>
+<td style="padding-top:20px;">
+<span style="color:#3A7BD5; font-weight:bold;">Best Regards,</span><br>
+Customer Services Doomshell Software<br><br>
+<span style="font-size:12px; color:#555;">Copyrights © 2021 Doomshell Software Pvt. Ltd | All Rights Reserved</span>
+</td>
+</tr>
+
+</tbody>
+</table>
+</td></tr>
+</tbody>
+
+<tfoot>
+<tr>
+<td>
+<table align="center" cellspacing="0px" cellpadding="0" style="width:94%">
+<tbody><tr><td><br></td><td><br></td><td><br></td></tr></tbody>
+</table>
+</td>
+</tr>
+</tfoot>
+
+</table>
+
+
+<script>
+document.getElementById("year").innerText = new Date().getFullYear();
+</script>
 
 </body>
 </html>
-`
-        .replace("{DASHBOARD_URL}", 'www.baaraat.com')
-      // .replace(/{{ORDER_TOTAL}}/g, plantotalprice)
-      // .replace(/{{TOTAL_USER}}/g, totaluser)
-      // .replace(/{{PLAN_RATE}}/g, per_user_rate)
-      // .replace(/{{PLAN_START}}/g, formatDateTime(created))
-      // .replace(/{{PLAN_END}}/g, formatDateTime(expiry_date))
-      // .replace(/{{PLAN_TOTAL}}/g, plantotalprice)
-      // .replace(/{{TAX}}/g, taxprice)
-      // .replace(/{{DISCOUNT}}/g, discount)
-      // .replace(/{{PAY_URL}}/g, "https://ezypayroll.in/logins");
+`; // (Keeping design untouched)
+    let taxRows = "";
 
-      const emailPayload = UpdateStatus({
-        toEmail: `${Data?.Customer?.email}`,
-        subject: 'Demo',
-        html,
-      });
-      try {
-        await sendEmail(emailPayload);
-        console.log('Email generated successfully.');
-      } catch (err) {
-        console.error('Failed to send demo email:', err);
-      }
-      return true;
+    if (Data?.igst && Data?.igst !== 0) {
+      taxRows = `
+    <tr><td style="text-align:left">IGST (18%)</td><td style="text-align:right">${formatPrice(Data.igst)}</td></tr>
+    <tr><td style="text-align:left; font-weight:bold;">Total Tax</td><td style="text-align:right; font-weight:bold;">${formatPrice(Data.taxprice)}</td></tr>
+  `;
     } else {
-      throw new apiErrors.BadRequestError("Subscription not active anymore.");
+      taxRows = `
+    <tr><td style="text-align:left">CGST (9%)</td><td style="text-align:right">${formatPrice(Data.cgst ?? 0)}</td></tr>
+    <tr><td style="text-align:left">SGST (9%)</td><td style="text-align:right">${formatPrice(Data.sgst ?? 0)}</td></tr>
+    <tr><td style="text-align:left; font-weight:bold;">Total Tax (18%)</td><td style="text-align:right; font-weight:bold;">${formatPrice(Data.taxprice)}</td></tr>
+  `;
     }
+
+    const totalPrice = Math.round(Data?.plantotalprice ?? 0);
+    const replacements: Record<string, any> = {
+      PLANRATE: formatPrice(Data?.per_user_rate ?? 0),
+      PLANSTART: formatDateTime(Data?.created),
+      PLANEND: formatDateTime(Data?.expiry_date),
+      PLANTOTAL: formatPrice(Data?.plantotalprice ?? 0),
+      TAX: formatPrice(Data?.taxprice ?? 0),
+      DISCOUNT: formatPrice(Data?.discount ?? 0),
+      ORDERTOTAL: formatPrice(totalPrice),
+      PAY_URL: "https://ezypayroll.in/logins",
+      COMPANYNAME: Data?.Customer?.company_name ?? "",
+      INVOICEDATE: formatDateTime(new Date()),
+      TAX_ROWS: taxRows,
+      NETPRICE: formatPrice((Data?.plantotalprice ?? 0) - (Data?.taxprice ?? 0))
+    };
+
+    // Replace all dynamic values in template
+    for (const key in replacements) {
+      html = html.replaceAll(new RegExp(`{{${key}}}`, "g"), replacements[key]);
+      html = html.replaceAll(new RegExp(`{${key}}`, "g"), replacements[key]); // Supports both `{KEY}` and `{{KEY}}`
+    }
+
+    const emailPayload = UpdateStatus({
+      toEmail: Data?.Customer?.email,
+      subject: 'Invoice Details',
+      html,
+    });
+
+    await sendEmail(emailPayload);
+
+    console.log("Invoice email sent successfully.");
+    return true;
+
   } catch (error) {
     console.error("Error while sending email:", error);
-    throw (error);
+    throw error;
   }
 };
 
@@ -660,7 +920,7 @@ export const bulkInactiveExpiredSubscriptions = async () => {
 };
 
 // Invoice 
-{/* const html = `<!DOCTYPE html>
+{/**const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
@@ -813,21 +1073,21 @@ document.getElementById("year").innerText = new Date().getFullYear();
 
 </body>
 </html>
-` 
-           .replaceAll("{COMPANYNAME}", data.COMPANYNAME)
-           .replaceAll("{INVOICEDATE}", data.INVOICEDATE)
-           .replaceAll("{PLANRATE}", data.PLANRATE)
-           .replaceAll("{PLANSTART}", data.PLANSTART)
-           .replaceAll("{PLANEND}", data.PLANEND)
-           .replaceAll("{PLANTOTAL}", data.PLANTOTAL)
-           .replaceAll("{TOTALUSER}", data.TOTALUSER)
-           .replaceAll("{CGST}", data.CGST)
-           .replaceAll("{SGST}", data.SGST)
-           .replaceAll("{IGST}", data.IGST)
-           .replaceAll("{TAX}", data.TAX)
-           .replaceAll("{DISCOUNT}", data.DISCOUNT)
-           .replaceAll("{ORDERTOTAL}", data.ORDERTOTAL);
- */}
+`
+  .replaceAll("{COMPANYNAME}", data.COMPANYNAME)
+  .replaceAll("{INVOICEDATE}", data.INVOICEDATE)
+  .replaceAll("{PLANRATE}", data.PLANRATE)
+  .replaceAll("{PLANSTART}", data.PLANSTART)
+  .replaceAll("{PLANEND}", data.PLANEND)
+  .replaceAll("{PLANTOTAL}", data.PLANTOTAL)
+  .replaceAll("{TOTALUSER}", data.TOTALUSER)
+  .replaceAll("{CGST}", data.CGST)
+  .replaceAll("{SGST}", data.SGST)
+  .replaceAll("{IGST}", data.IGST)
+  .replaceAll("{TAX}", data.TAX)
+  .replaceAll("{DISCOUNT}", data.DISCOUNT)
+  .replaceAll("{ORDERTOTAL}", data.ORDERTOTAL);
+  */}
 
 
 // Demo request email template
