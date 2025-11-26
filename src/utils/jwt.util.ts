@@ -29,6 +29,25 @@ export const createToken = (data: CustomJwtPayload): string => {
   return jwt.sign(payload, jwtConfig.secret as string, options);
 };
 
+
+/**
+ * Create a JWT with tenant (company) schema included
+ */
+export const createTokenForPass = (data: CustomJwtPayload): string => {
+  const payload: CustomJwtPayload = {
+    id: data.id,
+    email: data.email,
+    type: data.type,
+  };
+
+  const options: SignOptions = {
+    expiresIn: (jwtConfig.ttl || "1d") as jwt.SignOptions["expiresIn"],
+  };
+
+
+  return jwt.sign(payload, jwtConfig.secret as string, options);
+};
+
 /**
  * Verify a JWT and return decoded payload with tenant info
  */

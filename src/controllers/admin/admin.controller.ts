@@ -3,7 +3,7 @@ import * as AuthService from "../../services/admin/admin.service";
 import jwt, { VerifyOptions, JwtPayload } from 'jsonwebtoken';
 import jwtConfig from '../../../config/jwt.config';
 import bcryptUtil from "../../utils/bcrypt.util";
-import { createToken, verifyToken } from "../../utils/jwt.util";
+import { createToken, createTokenForPass, verifyToken } from "../../utils/jwt.util";
 import { convertToIST } from '../../middleware/date';
 import { sendEmail } from '../../utils/email';
 import { UpdateStatus } from '../../utils/email-templates';
@@ -241,7 +241,6 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
 export const forgotPassword = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
-
     const user: any = await AuthService.findUserByEmailLogin(email);
 
     // Always return success to avoid exposing email
@@ -253,26 +252,22 @@ export const forgotPassword = async (req: Request, res: Response) => {
     }
 
     // Create 1-day token
-    const token = await createToken({
+    const token = await createTokenForPass({
       id: user.id,
       email: user.email,
       type: "password_reset",
     });
 
-
+    // Verify token
     let decoded: any;
     try {
-      const options: VerifyOptions = {};
-      decoded = jwt.verify(token, jwtConfig.secret as string, options)
+      decoded = jwt.verify(token, jwtConfig.secret as string) as jwt.JwtPayload;
     } catch (err) {
       return res.status(400).json({
         status: false,
         message: "Invalid or expired reset link.",
       });
     }
-
-    console.log("decoded : ", decoded);
-
 
     const resetLink = `${process.env.SITE_URL}/administrator/reset-password?token=${token}`;
 
@@ -303,28 +298,37 @@ export const forgotPassword = async (req: Request, res: Response) => {
       message: "Reset link sent to your email.",
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Forgot Password Error:", error);
-    return res.status(500).json({ status: false, message: "Internal Server Error" });
+    return res.status(500).json({ status: false, message: error?.message ?? "Internal Server Error" });
   }
 };
+
+const usedResetTokens = new Set<string>(); // persists while server is running
 
 export const resetPassword = async (req: Request, res: Response) => {
   try {
     const { token, password } = req.body;
 
     if (!token) {
-      console.log("token", token);
       return res.status(400).json({
         status: false,
         message: "Missing reset token.",
       });
     }
 
+    // 🚫 If token already used
+    if (usedResetTokens.has(token)) {
+      return res.status(400).json({
+        status: false,
+        message: "Reset link has already been used.",
+      });
+    }
+
+    // Verify token
     let decoded: any;
     try {
-      const options: VerifyOptions = {};
-      decoded = jwt.verify(token, jwtConfig.secret as string, options)
+      decoded = jwt.verify(token, jwtConfig.secret as string) as jwt.JwtPayload;
     } catch (err) {
       return res.status(400).json({
         status: false,
@@ -332,8 +336,13 @@ export const resetPassword = async (req: Request, res: Response) => {
       });
     }
 
-    // console.log("decoded :", decoded);
-    // return false
+    // Check if token contains valid payload
+    if (!decoded?.id || !decoded?.email || decoded?.type !== "password_reset") {
+      return res.status(400).json({
+        status: false,
+        message: "Invalid token payload.",
+      });
+    }
 
     // Fetch user
     const user: any = await AuthService.findUserById(decoded.id);
@@ -344,28 +353,34 @@ export const resetPassword = async (req: Request, res: Response) => {
       });
     }
 
-    // console.log("user ", user);
+    // Now verify token user matches DB user
+    if (decoded.id !== user.id || decoded.email !== user.email) {
+      return res.status(400).json({
+        status: false,
+        message: "Token does not match the user.",
+      });
+    }
 
     // Hash new password
     const hashedPassword = await bcryptUtil.createHash(password);
 
-    const updatedData = await AuthService.updateUser(user.id, {
+    await AuthService.updateUser(user.id, {
       password: hashedPassword,
     });
 
-    // console.log("updatedData ", updatedData);
-
+    // 🔥 Mark token as used so it can't be used again
+    usedResetTokens.add(token);
 
     return res.status(200).json({
       status: true,
       message: "Password reset successful. You may now log in.",
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Reset Password Error:", error);
     return res.status(500).json({
       status: false,
-      message: "Internal Server Error",
+      message: error?.message ?? "Internal Server Error",
     });
   }
 };
