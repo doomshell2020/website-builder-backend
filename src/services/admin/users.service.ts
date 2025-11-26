@@ -6,7 +6,7 @@ import { UpdateStatus } from '../../utils/email-templates';
 import { deleteUploadFolder } from "../../utils/delete-folder";
 import { deleteFile } from '../../utils/delete-single-file'
 import { createSchema, createAndCloneSchema, deleteSchema, renameSchema } from "./schema.service";
-const { User, Role, Theme, Subscription } = db;
+const { User, Role, Theme, Subscription, Plan } = db;
 
 type PaginationParams = {
   page?: number | string;
@@ -45,7 +45,14 @@ export const findAllUsers = async (params: PaginationParams) => {
         as: "subscriptionData",
         limit: 1,
         order: [["createdAt", "DESC"]],
-      }
+        include: [
+          {
+            model: Plan,
+            as: "Plan",
+            attributes: ["id", "name", "price"],
+          },
+        ],
+      },
     ],
   });
   return {

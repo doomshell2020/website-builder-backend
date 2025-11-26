@@ -46,6 +46,8 @@ router.use('/faq', setSchema as any, authMiddleware as any, FaqRouter as any);
 
 // Admin login route with validation and error handling
 router.post('/auth/login', validate(schema.login) as any, ErrorHandler(AuthController.login));
+router.post('/auth/forgot-password', ErrorHandler(AuthController.forgotPassword));
+router.post('/auth/reset-password', ErrorHandler(AuthController.resetPassword));
 
 // router.post('/register', ErrorHandler(AuthController.register as any));
 router.get('/profile', authMiddleware as any, ErrorHandler(ProfileController.FindUser));

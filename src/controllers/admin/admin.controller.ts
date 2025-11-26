@@ -1,9 +1,12 @@
 import { Request, Response } from "express";
 import * as AuthService from "../../services/admin/admin.service";
-import jwtConfig from "../../../config/jwt.config";
+import jwt, { VerifyOptions, JwtPayload } from 'jsonwebtoken';
+import jwtConfig from '../../../config/jwt.config';
 import bcryptUtil from "../../utils/bcrypt.util";
 import { createToken, verifyToken } from "../../utils/jwt.util";
 import { convertToIST } from '../../middleware/date';
+import { sendEmail } from '../../utils/email';
+import { UpdateStatus } from '../../utils/email-templates';
 
 // ===== REGISTER ===== //
 export const register = async (req: Request, res: Response): Promise<Response> => {
@@ -228,6 +231,138 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
     });
   } catch (error: any) {
     console.error("Error in login:", error);
+    return res.status(500).json({
+      status: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const forgotPassword = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+
+    const user: any = await AuthService.findUserByEmailLogin(email);
+
+    // Always return success to avoid exposing email
+    if (!user) {
+      return res.status(200).json({
+        status: false,
+        message: "Email not found in our records.",
+      });
+    }
+
+    // Create 1-day token
+    const token = await createToken({
+      id: user.id,
+      email: user.email,
+      type: "password_reset",
+    });
+
+
+    let decoded: any;
+    try {
+      const options: VerifyOptions = {};
+      decoded = jwt.verify(token, jwtConfig.secret as string, options)
+    } catch (err) {
+      return res.status(400).json({
+        status: false,
+        message: "Invalid or expired reset link.",
+      });
+    }
+
+    console.log("decoded : ", decoded);
+
+
+    const resetLink = `${process.env.SITE_URL}/administrator/reset-password?token=${token}`;
+
+    // Prepare email HTML
+    const html = `
+      <p>Hello ${user?.name || "User"},</p>
+      <p>You requested to reset your password.</p>
+      <p>Click below to continue:</p>
+      <br/>
+      <a href="${resetLink}" 
+        style="background:#4F46E5;color:white;padding:12px 18px;text-decoration:none;border-radius:6px;font-weight:bold;">
+        Reset Password
+      </a>
+      <br><br>
+      <p>This link will expire in <b>24 hours</b>.</p>
+    `;
+
+    const emailPayload = UpdateStatus({
+      toEmail: email,
+      subject: "Reset Your Password",
+      html,
+    });
+
+    await sendEmail(emailPayload);
+
+    return res.status(200).json({
+      status: true,
+      message: "Reset link sent to your email.",
+    });
+
+  } catch (error) {
+    console.error("Forgot Password Error:", error);
+    return res.status(500).json({ status: false, message: "Internal Server Error" });
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token) {
+      console.log("token", token);
+      return res.status(400).json({
+        status: false,
+        message: "Missing reset token.",
+      });
+    }
+
+    let decoded: any;
+    try {
+      const options: VerifyOptions = {};
+      decoded = jwt.verify(token, jwtConfig.secret as string, options)
+    } catch (err) {
+      return res.status(400).json({
+        status: false,
+        message: "Invalid or expired reset link.",
+      });
+    }
+
+    // console.log("decoded :", decoded);
+    // return false
+
+    // Fetch user
+    const user: any = await AuthService.findUserById(decoded.id);
+    if (!user) {
+      return res.status(400).json({
+        status: false,
+        message: "User not found.",
+      });
+    }
+
+    // console.log("user ", user);
+
+    // Hash new password
+    const hashedPassword = await bcryptUtil.createHash(password);
+
+    const updatedData = await AuthService.updateUser(user.id, {
+      password: hashedPassword,
+    });
+
+    // console.log("updatedData ", updatedData);
+
+
+    return res.status(200).json({
+      status: true,
+      message: "Password reset successful. You may now log in.",
+    });
+
+  } catch (error) {
+    console.error("Reset Password Error:", error);
     return res.status(500).json({
       status: false,
       message: "Internal Server Error",
