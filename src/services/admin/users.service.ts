@@ -4,7 +4,7 @@ import bcryptUtil from "../../utils/bcrypt.util";
 import { sendEmail } from '../../utils/email';
 import { UpdateStatus } from '../../utils/email-templates';
 import { deleteUploadFolder } from "../../utils/delete-folder";
-import { deleteFile } from '../../utils/delete-single-file'
+import { deleteFile } from '../../utils/delete-single-file';
 import { createSchema, createAndCloneSchema, deleteSchema, renameSchema } from "./schema.service";
 const { User, Role, Theme, Subscription, Plan } = db;
 
@@ -82,17 +82,15 @@ export const fetchAllAdmin = async (params: PaginationParams) => {
 };
 
 export const createUser = async (req: any) => {
-  const { body, file } = req;
+  const { body, files } = req;
+  const imageFolder = req.imagefolder;
 
-  const imageFolder = req.imagefolder; // e.g. tenantA_1731424523123
-  const uploadedFile = file?.filename || null; // e.g. uuid_timestamp.png
+  // Pick uploaded filenames
+  const companyLogoFile = files?.company_logo?.[0]?.filename || null;
+  const faviconFile = files?.favicon?.[0]?.filename || null;
 
-  // Build file path (optional, for easy access)
-  const companyLogoPath = uploadedFile ? `${imageFolder}/${uploadedFile}` : null;
-
-  // console.log("📁 Folder:", imageFolder);
-  // console.log("🖼️ Uploaded File:", uploadedFile);
-  // console.log("✅ Full Path:", companyLogoPath);
+  const companyLogoPath = companyLogoFile ? `${imageFolder}/${companyLogoFile}` : null;
+  const faviconPath = faviconFile ? `${imageFolder}/${faviconFile}` : null;
 
   const hashedPassword = await bcryptUtil.createHash(body.password);
 
@@ -101,12 +99,42 @@ export const createUser = async (req: any) => {
     password: hashedPassword,
     status: "N",
     approval: "N",
-    imageFolder: imageFolder, // folder name
-    company_logo: companyLogoPath, // full path 
+    // save folder & files
+    imageFolder: imageFolder,
+    company_logo: companyLogoPath,
+    favicon: faviconPath,
   });
 
   return newUser;
 };
+
+// export const createUser = async (req: any) => {
+//   const { body, file } = req;
+
+//   const imageFolder = req.imagefolder; // e.g. tenantA_1731424523123
+//   const uploadedFile = file?.filename || null; // e.g. uuid_timestamp.png
+
+//   // Build file path (optional, for easy access)
+//   const companyLogoPath = uploadedFile ? `${imageFolder}/${uploadedFile}` : null;
+
+//   // console.log("📁 Folder:", imageFolder);
+//   // console.log("🖼️ Uploaded File:", uploadedFile);
+//   // console.log("✅ Full Path:", companyLogoPath);
+
+//   const hashedPassword = await bcryptUtil.createHash(body.password);
+
+//   const newUser = await User.create({
+//     ...body,
+//     password: hashedPassword,
+//     status: "N",
+//     approval: "N",
+//     imageFolder: imageFolder, // folder name
+//     company_logo: companyLogoPath, // full path 
+//   });
+
+//   return newUser;
+// };
+
 
 export const findUserByEmail = async (email: string) => {
   return await User.findOne({ where: { email } });
@@ -170,61 +198,126 @@ export const findUserById = async (id: string | number) => {
 };
 
 export const updateUser = async (id: number, req: any) => {
-  const { body, file } = req;
+  const { body, files } = req;
 
-  // 🖼️ Handle new upload (if any)
-  const imageFolder = req.imagefolder; // e.g. tenantA_1731424523123
-  const uploadedFile = file?.filename || null; // e.g. uuid_timestamp.png
-  const companyLogoPath = uploadedFile ? `${imageFolder}/${uploadedFile}` : null;
+  const imageFolder = req.imagefolder; // assigned by uploader
 
-  // 🧠 1️⃣ Validate duplicate email
+  // Pick filenames from uploaded files
+  const companyLogoFile = files?.company_logo?.[0]?.filename || null;
+  const faviconFile = files?.favicon?.[0]?.filename || null;
+
+  const companyLogoPath = companyLogoFile ? `${imageFolder}/${companyLogoFile}` : null;
+  const faviconPath = faviconFile ? `${imageFolder}/${faviconFile}` : null;
+
+  // 1️⃣ Validate duplicate email
   const existing = await User.findOne({
     where: { email: body.email, id: { [Op.ne]: id } },
   });
   if (existing) {
+    // rollback uploaded files if validation fails
     if (companyLogoPath) deleteFile(companyLogoPath);
+    if (faviconPath) deleteFile(faviconPath);
     throw new Error("A user with this email already exists.");
   }
 
-  // 🧠 2️⃣ Get current user
+  // 2️⃣ Fetch current user
   const currentUser: any = await User.findByPk(id);
   if (!currentUser) {
     if (companyLogoPath) deleteFile(companyLogoPath);
+    if (faviconPath) deleteFile(faviconPath);
     throw new Error("User not found.");
   }
 
-  // // 🧠 3️⃣ Approval check
-  // if (currentUser.approval === "N") {
-  //   if (companyLogoPath) deleteFile(companyLogoPath);
-  //   throw new Error("This user is not approved for update.");
-  // }
-
-  // 🧩 4️⃣ Prepare updated data
+  // 3️⃣ Prepare update payload
   const updateData: any = {
     ...body,
     updatedAt: new Date(),
   };
 
-  // 🧠 5️⃣ Password hashing (if provided)
+  // 4️⃣ Hash password if provided
   if (body.password) {
     updateData.password = await bcryptUtil.createHash(body.password);
   }
 
-  // 🖼️ 6️⃣ Handle new logo file
+  // 5️⃣ Handle new uploaded company_logo
   if (companyLogoPath) {
-    // delete old logo if exists
     if (currentUser.company_logo) {
-      await deleteFile(currentUser.company_logo);
+      await deleteFile(currentUser.company_logo); // remove old
     }
     updateData.company_logo = companyLogoPath;
   }
 
-  // 🧠 7️⃣ Update record
+  // 6️⃣ Handle new uploaded favicon
+  if (faviconPath) {
+    if (currentUser.favicon) {
+      await deleteFile(currentUser.favicon); // remove old
+    }
+    updateData.favicon = faviconPath;
+  }
+
+  // 7️⃣ Save updates
   await User.update(updateData, { where: { id } });
 
-  // 🧠 8️⃣ Return updated user
   return await User.findByPk(id);
 };
+
+// export const updateUser = async (id: number, req: any) => {
+//   const { body, file } = req;
+
+//   // 🖼️ Handle new upload (if any)
+//   const imageFolder = req.imagefolder; // e.g. tenantA_1731424523123
+//   const uploadedFile = file?.filename || null; // e.g. uuid_timestamp.png
+//   const companyLogoPath = uploadedFile ? `${imageFolder}/${uploadedFile}` : null;
+
+//   // 🧠 1️⃣ Validate duplicate email
+//   const existing = await User.findOne({
+//     where: { email: body.email, id: { [Op.ne]: id } },
+//   });
+//   if (existing) {
+//     if (companyLogoPath) deleteFile(companyLogoPath);
+//     throw new Error("A user with this email already exists.");
+//   }
+
+//   // 🧠 2️⃣ Get current user
+//   const currentUser: any = await User.findByPk(id);
+//   if (!currentUser) {
+//     if (companyLogoPath) deleteFile(companyLogoPath);
+//     throw new Error("User not found.");
+//   }
+
+//   // // 🧠 3️⃣ Approval check
+//   // if (currentUser.approval === "N") {
+//   //   if (companyLogoPath) deleteFile(companyLogoPath);
+//   //   throw new Error("This user is not approved for update.");
+//   // }
+
+//   // 🧩 4️⃣ Prepare updated data
+//   const updateData: any = {
+//     ...body,
+//     updatedAt: new Date(),
+//   };
+
+//   // 🧠 5️⃣ Password hashing (if provided)
+//   if (body.password) {
+//     updateData.password = await bcryptUtil.createHash(body.password);
+//   }
+
+//   // 🖼️ 6️⃣ Handle new logo file
+//   if (companyLogoPath) {
+//     // delete old logo if exists
+//     if (currentUser.company_logo) {
+//       await deleteFile(currentUser.company_logo);
+//     }
+//     updateData.company_logo = companyLogoPath;
+//   }
+
+//   // 🧠 7️⃣ Update record
+//   await User.update(updateData, { where: { id } });
+
+//   // 🧠 8️⃣ Return updated user
+//   return await User.findByPk(id);
+// };
+
 
 export const deleteUserById = async (id: number): Promise<boolean> => {
   if (!id || typeof id !== 'number') {

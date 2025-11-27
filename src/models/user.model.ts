@@ -47,6 +47,7 @@ export default (sequelize: Sequelize) => {
       address2: { type: DataTypes.STRING(255), allowNull: true },
       image: { type: DataTypes.TEXT, allowNull: true },
       company_logo: { type: DataTypes.TEXT, allowNull: false },
+      favicon: { type: DataTypes.TEXT, allowNull: false },
       status: { type: DataTypes.ENUM("Y", "N"), allowNull: false, defaultValue: "Y" },
       gst_type: { type: DataTypes.ENUM("IGST", "CGST_SGST"), allowNull: false, defaultValue: "CGST_SGST" },
       approval: { type: DataTypes.CHAR(1), allowNull: false, defaultValue: 'N' },

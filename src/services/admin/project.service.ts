@@ -35,7 +35,7 @@ export const findProjectByDomain = async (domain: string) => {
         let cleanDomain = domain.replace(/^www\./, "").toLowerCase().trim();
 
         // Extract subdomain part if applicable
-        const subdomain = cleanDomain.endsWith("baaraat.com")
+        const subdomain = cleanDomain.endsWith("xpertart.com")
             ? cleanDomain.split(".")[0]
             : null;
 

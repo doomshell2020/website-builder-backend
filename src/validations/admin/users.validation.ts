@@ -23,6 +23,7 @@ export const cmsUserSchema = Joi.object({
   address2: Joi.string().max(255).allow(null, ""),
   // image: Joi.string().allow(null, ""),
   company_logo: Joi.string().allow(null, ""),
+  favicon: Joi.string().allow(null, ""),
   status: Joi.string().valid("Y", "N").default("Y"),
   gst_type: Joi.string().valid("IGST", "CGST_SGST").default("CGST_SGST"),
   deleted: Joi.string().valid("Y", "N").default("N"),

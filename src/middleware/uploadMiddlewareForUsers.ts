@@ -47,20 +47,20 @@ export default function createUploaderForUsers(
 
     switch (allowed) {
       case "image":
-        allowedTypes = /jpeg|jpg|png/;
-        errorMsg = "Only .jpeg, .jpg, .png files are allowed";
+        allowedTypes = /jpeg|jpg|png|ico/;
+        errorMsg = "Only .jpeg, .jpg, .png, .ico files are allowed";
         break;
       case "image+pdf":
-        allowedTypes = /jpeg|jpg|png|pdf/;
-        errorMsg = "Only .jpeg, .jpg, .png, .pdf files are allowed";
+        allowedTypes = /jpeg|jpg|png|ico|pdf/;
+        errorMsg = "Only .jpeg, .jpg, .png, .ico, .pdf files are allowed";
         break;
       case "csv+xlsx":
         allowedTypes = /csv|xlsx/;
         errorMsg = "Only .csv and .xlsx files are allowed";
         break;
       case "all":
-        allowedTypes = /jpeg|jpg|png|pdf|csv|xlsx/;
-        errorMsg = "Only .jpeg, .jpg, .png, .pdf, .csv, .xlsx files are allowed";
+        allowedTypes = /jpeg|jpg|png|ico|pdf|csv|xlsx/;
+        errorMsg = "Only .jpeg, .jpg, .png, .ico, .pdf, .csv, .xlsx files are allowed";
         break;
       default:
         allowedTypes = /jpeg|jpg|png/;
@@ -76,33 +76,42 @@ export default function createUploaderForUsers(
 
   // 💾 Storage configuration
   const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      // 1️⃣ If folder already exists in body, reuse it
-      let folderName = req.body?.imageFolder;
+    destination: (req: any, file, cb) => {
+      let folderName;
 
-
-      if (folderName && folderName.trim() !== "") {
-        console.log(`🟢 Using existing folder: ${folderName}`);
+      // 🟢 If folder already selected/generated earlier in this request → reuse it
+      if (req.imagefolder) {
+        folderName = req.imagefolder;
+        console.log(`🟢 Reusing folder for all uploads in same request: ${folderName}`);
       } else {
-        // 2️⃣ Otherwise, generate new one using schema_name or random
-        const schemaName = req.body?.schema_name;
-        folderName = generateFolderName(schemaName);
-        console.log(`🆕 Creating new folder: ${folderName}`);
+        // 1️⃣ If folder already exists in body (edit/update)
+        folderName = req.body?.imageFolder;
+
+        if (folderName && folderName.trim() !== "") {
+          console.log(`🟢 Using existing folder from database: ${folderName}`);
+        } else {
+          // 2️⃣ Otherwise, generate new folder (create)
+          const schemaName = req.body?.schema_name;
+          folderName = generateFolderName(schemaName);
+          console.log(`🆕 Creating new upload folder: ${folderName}`);
+        }
+
+        // 📝 Store folder in req so next files in this request don't regenerate folder
+        req.imagefolder = folderName;
       }
 
       // 3️⃣ Ensure directory exists
       const uploadPath = path.join(baseUploadDir, folderName);
       ensureDir(uploadPath);
 
-      // 4️⃣ Attach folder name to request for controller
-      (req as any).imagefolder = folderName;
-
       cb(null, uploadPath);
     },
+
     filename: (req, file, cb) => {
       cb(null, generateFilename(file));
-    },
+    }
   });
+
 
   const upload = multer({
     storage,

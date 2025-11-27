@@ -9,7 +9,7 @@ import createUploaderOnlyUsers from "../../middleware/uploadMiddlewareForUsers";
 const router: Router = express.Router();
 
 // ===== CREATE USER =====
-router.post("/add", createUploaderOnlyUsers('company_logo', 'single', 'image', 5),
+router.post("/add", createUploaderOnlyUsers(['company_logo', 'favicon'], 'multi', 'image', 5),
   validate(schema.cmsUserSchema) as any, ErrorHandler(UserController.CreateUser as any));
 
 // ===== GET USERS =====
@@ -19,11 +19,11 @@ router.get("/view/:id", ErrorHandler(UserController.FindUser as any));
 // router.get("/view-company/:name", ErrorHandler(UserController.FindProject as any));
 
 // ===== UPDATE USERS =====
-router.put("/update/:id", createUploaderOnlyUsers('company_logo', 'single', 'image', 5),
+router.put("/update/:id", createUploaderOnlyUsers(['company_logo', 'favicon'], 'multi', 'image', 5),
   validate(schema.editCmsUserSchema) as any, ErrorHandler(UserController.UpdateUser as any));
 
 // ===== UPDATE USERS =====
-router.put("/self/:id", createUploaderOnlyUsers('company_logo', 'single', 'image', 5),
+router.put("/self/:id", createUploaderOnlyUsers(['company_logo', 'favicon'], 'multi', 'image', 5),
   validate(schema.editCmsUserSchema) as any, ErrorHandler(ProfileController.UpdateUser as any));
 
 // ===== DELETE USER =====

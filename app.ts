@@ -23,9 +23,9 @@ app.use(
 
         // ✅ Allow main domains
         if (
-          hostname === "baaraat.com" ||
-          hostname === "www.baaraat.com" ||
-          hostname.endsWith(".baaraat.com") || // subdomains
+          hostname === "xpertart.com" ||
+          hostname === "www.xpertart.com" ||
+          hostname.endsWith(".xpertart.com") || // subdomains
           hostname.endsWith(".webbuilder.local") || // local subdomains
           hostname.endsWith(".vercel.app") || // Vercel preview deployments
           hostname.endsWith(".doomshell.com") || // API/infra
