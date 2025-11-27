@@ -272,18 +272,40 @@ export const forgotPassword = async (req: Request, res: Response) => {
     const resetLink = `${process.env.SITE_URL}/administrator/reset-password?token=${token}`;
 
     // Prepare email HTML
-    const html = `
-      <p>Hello ${user?.name || "User"},</p>
-      <p>You requested to reset your password.</p>
-      <p>Click below to continue:</p>
-      <br/>
-      <a href="${resetLink}" 
-        style="background:#4F46E5;color:white;padding:12px 18px;text-decoration:none;border-radius:6px;font-weight:bold;">
-        Reset Password
-      </a>
-      <br><br>
-      <p>This link will expire in <b>24 hours</b>.</p>
-    `;
+    const html = `<div style="font-family: Arial, sans-serif; background: #f7f7f9; padding: 40px;">
+    <div style="max-width: 520px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+      
+      <div style="background: #4F46E5; padding: 18px 25px;">
+        <h2 style="margin: 0; color: white; font-weight: 600; font-size: 20px;">
+          🔐 Password Reset Request
+        </h2>
+      </div>
+
+      <div style="padding: 30px 25px; color: #333; font-size: 15px; line-height: 1.6;">
+        <p>Hello <b>${user?.name || "User"}</b>,</p>
+        <p>We received a request to reset your password. If this was you, click the button below to continue.</p>
+        
+        <div style="text-align:center; margin: 35px 0;">
+          <a href="${resetLink}" 
+            style="background:#4F46E5; color:white; padding: 14px 26px; text-decoration:none; border-radius: 6px; font-weight:bold; font-size: 15px; display:inline-block;">
+            Reset Password
+          </a>
+        </div>
+
+        <p>This link will expire in <b>24 hours</b> for security reasons.</p>
+
+        <p>If you didn’t request a password reset, you can safely disregard this email — your account remains secure.</p>
+
+        <br>
+        <p style="color: #555;">Regards,<br>
+        <b>Team Doomshell</b></p>
+      </div>
+
+      <div style="background:#f1f3f7; padding: 12px 25px; font-size: 12px; color: #777; text-align:center;">
+        © ${new Date().getFullYear()} Doomshell. All rights reserved.
+      </div>
+    </div>
+  </div>`;
 
     const emailPayload = UpdateStatus({
       toEmail: email,
@@ -291,7 +313,11 @@ export const forgotPassword = async (req: Request, res: Response) => {
       html,
     });
 
-    await sendEmail(emailPayload);
+    try {
+      await sendEmail(emailPayload);
+    } catch (error) {
+      console.error("Failed to send password updated email:", error);
+    }
 
     return res.status(200).json({
       status: true,
@@ -370,6 +396,64 @@ export const resetPassword = async (req: Request, res: Response) => {
 
     // 🔥 Mark token as used so it can't be used again
     usedResetTokens.add(token);
+
+    const loginLink = `${process.env.SITE_URL}/administrator/`;
+
+    // Prepare email HTML
+    const html = `<div style="font-family: Arial, sans-serif; background: #f7f7f9; padding: 40px;">
+    <div style="max-width: 520px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+      
+      <div style="background: #16a34a; padding: 18px 25px;">
+        <h2 style="margin: 0; color: white; font-weight: 600; font-size: 20px;">
+          ✅ Password Updated Successfully
+        </h2>
+      </div>
+
+      <div style="padding: 30px 25px; color: #333; font-size: 15px; line-height: 1.6;">
+        <p>Hello <b>${user?.name || "User"}</b>,</p>
+
+        <p>Your password has been successfully updated. You can now log in with your new password provided below.</p>
+
+        <div style="margin: 30px 0; background: #f1f5f9; padding: 15px 18px; border-radius: 6px; border-left: 4px solid #16a34a;">
+          <p style="margin: 0; font-size: 15px;">
+            <b>New Password:</b>
+            <span style="font-weight: bold; color: #111;">${password}</span>
+          </p>
+        </div>
+
+        <div style="text-align:center; margin: 35px 0;">
+          <a href="${loginLink}" 
+            style="background:#4F46E5; color:white; padding: 14px 26px; text-decoration:none; border-radius: 6px; font-weight:bold; font-size: 15px; display:inline-block;">
+            Login Now
+          </a>
+        </div>
+
+        <p>If you did not make this change, please contact support immediately to secure your account.</p>
+
+        <br>
+        <p style="color: #555;">
+          Regards,<br>
+          <b>Team Doomshell</b>
+        </p>
+      </div>
+
+      <div style="background:#f1f3f7; padding: 12px 25px; font-size: 12px; color: #777; text-align:center;">
+        © ${new Date().getFullYear()} Doomshell. All rights reserved.
+      </div>
+    </div>
+  </div>`;
+
+    const emailPayload = UpdateStatus({
+      toEmail: user?.email,
+      subject: "Your Password Has Been Updated",
+      html,
+    });
+
+    try {
+      await sendEmail(emailPayload);
+    } catch (error) {
+      console.error("Failed to send password updated email:", error);
+    }
 
     return res.status(200).json({
       status: true,

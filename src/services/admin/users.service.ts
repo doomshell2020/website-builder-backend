@@ -155,8 +155,15 @@ export const findUserById = async (id: string | number) => {
       {
         model: Subscription,
         as: "subscriptionData",
-        limit: 1, // get latest
-        order: [["created", "DESC"]],
+        limit: 1,
+        order: [["createdAt", "DESC"]],
+        include: [
+          {
+            model: Plan,
+            as: "Plan",
+            attributes: ["id", "name", "price"],
+          },
+        ],
       }
     ],
   });
